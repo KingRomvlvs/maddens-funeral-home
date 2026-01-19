@@ -1,0 +1,323 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Semantic color mappings */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* Madden's Funeral Home brand colors */
+  --color-funeral-navy: var(--funeral-navy);
+  --color-funeral-gold: var(--funeral-gold);
+  --color-funeral-cream: var(--funeral-cream);
+  --color-funeral-charcoal: var(--funeral-charcoal);
+
+  /* Border radius scale - more dignified (less rounded) */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ============================================
+   MADDEN'S FUNERAL HOME - LIGHT MODE (Default)
+   Navy/Gold/Cream Theme - Dignified Elegance
+   ============================================ */
+:root {
+  /* Background: Warm Off-White */
+  --background: oklch(0.97 0.005 60);
+  --foreground: oklch(0.18 0.02 250);
+
+  /* Cards & Popovers */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 250);
+
+  /* Primary: Deep Navy - Dignified & Professional */
+  --primary: oklch(0.28 0.06 250);
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* Secondary: Warm Gray */
+  --secondary: oklch(0.95 0.005 60);
+  --secondary-foreground: oklch(0.28 0.06 250);
+
+  /* Muted */
+  --muted: oklch(0.95 0.005 60);
+  --muted-foreground: oklch(0.50 0.02 250);
+
+  /* Accent - Muted Gold */
+  --accent: oklch(0.95 0.005 60);
+  --accent-foreground: oklch(0.28 0.06 250);
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.20 27);
+
+  /* Borders & Inputs */
+  --border: oklch(0.90 0.005 60);
+  --input: oklch(0.90 0.005 60);
+  --ring: oklch(0.45 0.05 250);
+
+  /* Border Radius - Sharper for Dignity */
+  --radius: 0.375rem;
+
+  /* Madden's Funeral Home Brand Colors */
+  --funeral-navy: oklch(0.28 0.06 250);
+  --funeral-gold: oklch(0.78 0.14 80);
+  --funeral-cream: oklch(0.97 0.01 85);
+  --funeral-charcoal: oklch(0.22 0.01 250);
+
+  /* Sidebar */
+  --sidebar: oklch(0.97 0.005 60);
+  --sidebar-foreground: oklch(0.18 0.02 250);
+  --sidebar-primary: oklch(0.28 0.06 250);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.95 0.005 60);
+  --sidebar-accent-foreground: oklch(0.28 0.06 250);
+  --sidebar-border: oklch(0.90 0.005 60);
+  --sidebar-ring: oklch(0.45 0.05 250);
+}
+
+/* ============================================
+   MADDEN'S FUNERAL HOME - DARK MODE
+   Warm Charcoal - NOT Pure Black
+   Dignified & Respectful
+   ============================================ */
+.dark {
+  /* Background: Warm Charcoal (NOT pure black) */
+  --background: oklch(0.15 0.01 60);
+  --foreground: oklch(0.96 0.005 60);
+
+  /* Cards: Slightly Lighter Warm Charcoal */
+  --card: oklch(0.18 0.01 60);
+  --card-foreground: oklch(0.96 0.005 60);
+  --popover: oklch(0.18 0.01 60);
+  --popover-foreground: oklch(0.96 0.005 60);
+
+  /* Primary: Off-White for Dark Mode */
+  --primary: oklch(0.94 0.005 60);
+  --primary-foreground: oklch(0.15 0.01 60);
+
+  /* Secondary */
+  --secondary: oklch(0.22 0.01 60);
+  --secondary-foreground: oklch(0.96 0.005 60);
+
+  /* Muted */
+  --muted: oklch(0.22 0.01 60);
+  --muted-foreground: oklch(0.65 0.01 60);
+
+  /* Accent */
+  --accent: oklch(0.22 0.01 60);
+  --accent-foreground: oklch(0.96 0.005 60);
+
+  /* Destructive */
+  --destructive: oklch(0.65 0.18 22);
+
+  /* Borders & Inputs - Subtle warm transparency */
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.55 0.02 60);
+
+  /* Sidebar */
+  --sidebar: oklch(0.18 0.01 60);
+  --sidebar-foreground: oklch(0.96 0.005 60);
+  --sidebar-primary: oklch(0.78 0.14 80);
+  --sidebar-primary-foreground: oklch(0.15 0.01 60);
+  --sidebar-accent: oklch(0.22 0.01 60);
+  --sidebar-accent-foreground: oklch(0.96 0.005 60);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.55 0.02 60);
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Typography base - Dignified, readable */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-normal tracking-wide;
+  }
+
+  /* Larger base font for older audience readability */
+  html {
+    font-size: 17px;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      font-size: 18px;
+    }
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+@layer utilities {
+  /* Glassmorphism - Subtle for Funeral Home */
+  .glass {
+    @apply bg-white/80 backdrop-blur-lg border border-border;
+  }
+
+  .dark .glass {
+    @apply bg-white/5 backdrop-blur-lg border-white/10;
+  }
+
+  /* Section glassmorphism */
+  .section-glass {
+    @apply bg-white/60 backdrop-blur-md;
+  }
+
+  .dark .section-glass {
+    @apply bg-white/[0.03] backdrop-blur-md;
+  }
+
+  /* Text gradient - Gold accent for dark mode */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-funeral-navy to-funeral-charcoal;
+  }
+
+  .dark .text-gradient {
+    @apply bg-gradient-to-r from-white to-funeral-gold/80;
+  }
+
+  /* Premium button hover - Subtle gold glow */
+  .btn-glow {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-glow::after {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500;
+    background: radial-gradient(circle at center, var(--funeral-gold) 0%, transparent 70%);
+  }
+
+  .btn-glow:hover::after {
+    @apply opacity-10;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Dignified gold accent text */
+  .text-gold {
+    @apply text-funeral-gold;
+  }
+}
+
+/* ============================================
+   ANIMATIONS - Slower, More Dignified
+   ============================================ */
+@layer utilities {
+  /* Fade in up animation - Slower for dignity */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Subtle pulse for active states - Very gentle */
+  .animate-subtle-pulse {
+    animation: subtlePulse 3s ease-in-out infinite;
+  }
+
+  @keyframes subtlePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+
+  /* Gentle fade - For respectful transitions */
+  .animate-gentle-fade {
+    animation: gentleFade 1s ease-in-out;
+  }
+
+  @keyframes gentleFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* ============================================
+   REDUCED MOTION - Accessibility
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================
+   VIEW TRANSITIONS
+   ============================================ */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
