@@ -115,9 +115,12 @@ GUIDELINES:
 - Sign off warmly as "The Madden's Funeral Home Team"
 
 DO NOT:
+- Include a greeting like "Dear [name]" - the email template already adds this
 - Make up prices or specific details not in the business information
 - Use overly formal or cold language
-- Ignore the emotional context of funeral planning`;
+- Ignore the emotional context of funeral planning
+
+IMPORTANT: Start your response directly with the content. Do NOT include "Dear [name]" or any greeting - it will be added automatically.`;
 
     const userPrompt = `A customer named ${submission.name} has submitted the following inquiry:
 
@@ -345,8 +348,9 @@ GUIDELINES:
 - Include relevant contact information when appropriate
 - Format for easy editing by staff (they may want to add personal touches)
 - Keep response to 2-4 paragraphs
+- Include a warm sign-off (e.g., "Warm regards," or "With sympathy,")
 
-The draft should be ready to send with minor edits - include a greeting and sign-off.`;
+IMPORTANT: Do NOT include a greeting like "Dear [name]" - the email system adds this automatically. Start directly with the response content.`;
 
     let userPrompt = `Draft a response to this customer inquiry:
 
