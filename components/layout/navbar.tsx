@@ -13,23 +13,42 @@ import {
   MoonIcon,
   SunIcon,
   PhoneIcon,
+  ChevronDownIcon,
 } from "@/components/icons";
 
 // Dignified easing - slower and more graceful
 const dignifiedEase: [number, number, number, number] = [0.4, 0, 0.2, 1];
 
+// Navigation structure with dropdowns
 const navItems = [
   { href: "/", label: "Home" },
-  { href: "/services", label: "Services" },
+  {
+    label: "Information",
+    dropdown: [
+      { href: "/when-someone-dies", label: "When Someone Dies" },
+      { href: "/caskets", label: "Caskets" },
+      { href: "/urns", label: "Urns" },
+      { href: "/cremation", label: "Cremation" },
+      { href: "/eulogy-tips", label: "Eulogy Tips" },
+    ],
+  },
+  { href: "/cemetery", label: "Cemetery" },
+  {
+    label: "Community",
+    dropdown: [
+      { href: "/foundation", label: "Leslie Ruel Madden Foundation" },
+      { href: "/christmas-treat", label: "Christmas Treat" },
+    ],
+  },
   { href: "/about", label: "About Us" },
-  { href: "/pre-planning", label: "Pre-Planning" },
-  { href: "/resources", label: "Resources" },
   { href: "/contact", label: "Contact" },
 ];
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
+  const [mobileDropdown, setMobileDropdown] = React.useState<string | null>(null);
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
@@ -49,6 +68,8 @@ export function Navbar() {
   // Close mobile menu on route change
   React.useEffect(() => {
     setIsMobileMenuOpen(false);
+    setOpenDropdown(null);
+    setMobileDropdown(null);
   }, [pathname]);
 
   // Prevent body scroll when mobile menu is open
@@ -65,27 +86,6 @@ export function Navbar() {
 
   return (
     <>
-      {/* Top Contact Bar */}
-      <div className="hidden md:block bg-funeral-navy text-white py-2">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between text-sm">
-          <div className="flex items-center gap-6">
-            <a
-              href="tel:+18769520212"
-              className="flex items-center gap-2 hover:text-funeral-gold transition-colors"
-            >
-              <PhoneIcon size={14} />
-              <span>(876) 952-0212</span>
-            </a>
-            <span className="text-white/60">
-              37 Union Street, Montego Bay, Jamaica
-            </span>
-          </div>
-          <span className="text-white/80 font-light">
-            Serving Jamaica for Over 70 Years
-          </span>
-        </div>
-      </div>
-
       {/* Main Navbar */}
       <header
         className={cn(
@@ -110,20 +110,41 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                isActive={pathname === item.href}
-              >
-                {item.label}
-              </NavLink>
-            ))}
+          <div className="hidden lg:flex items-center gap-6">
+            {navItems.map((item) =>
+              item.dropdown ? (
+                <DropdownNav
+                  key={item.label}
+                  label={item.label}
+                  items={item.dropdown}
+                  isOpen={openDropdown === item.label}
+                  onOpen={() => setOpenDropdown(item.label)}
+                  onClose={() => setOpenDropdown(null)}
+                  pathname={pathname}
+                />
+              ) : (
+                <NavLink
+                  key={item.href}
+                  href={item.href!}
+                  isActive={pathname === item.href}
+                >
+                  {item.label}
+                </NavLink>
+              )
+            )}
           </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">
+            {/* Phone Number - Desktop */}
+            <a
+              href="tel:+18769520212"
+              className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground hover:text-funeral-gold transition-colors"
+            >
+              <PhoneIcon size={16} />
+              <span>(876) 952-0212</span>
+            </a>
+
             {/* Theme Toggle */}
             {mounted && (
               <Button
@@ -140,13 +161,6 @@ export function Navbar() {
                 <span className="sr-only">Toggle theme</span>
               </Button>
             )}
-
-            {/* Contact CTA - Desktop */}
-            <Link href="/contact" className="hidden lg:block">
-              <Button className="rounded-md uppercase tracking-wider text-xs">
-                Contact Us
-              </Button>
-            </Link>
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -210,31 +224,45 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4, ease: dignifiedEase }}
-              className="relative h-full flex flex-col items-center pt-28 pb-8 px-8 overflow-y-auto"
+              className="relative h-full flex flex-col pt-28 pb-8 px-8 overflow-y-auto"
             >
-              <div className="flex flex-col items-center gap-6">
+              <div className="flex flex-col gap-2">
                 {navItems.map((item, index) => (
                   <motion.div
-                    key={item.href}
+                    key={item.label}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
-                      delay: index * 0.1,
+                      delay: index * 0.08,
                       duration: 0.5,
                       ease: dignifiedEase,
                     }}
                   >
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "text-xl font-normal tracking-wide transition-colors py-2",
-                        pathname === item.href
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {item.label}
-                    </Link>
+                    {item.dropdown ? (
+                      <MobileDropdown
+                        label={item.label}
+                        items={item.dropdown}
+                        isOpen={mobileDropdown === item.label}
+                        onToggle={() =>
+                          setMobileDropdown(
+                            mobileDropdown === item.label ? null : item.label
+                          )
+                        }
+                        pathname={pathname}
+                      />
+                    ) : (
+                      <Link
+                        href={item.href!}
+                        className={cn(
+                          "block text-lg font-normal tracking-wide transition-colors py-3 border-b border-border/50",
+                          pathname === item.href
+                            ? "text-foreground"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -244,21 +272,24 @@ export function Navbar() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: navItems.length * 0.1,
+                  delay: navItems.length * 0.08,
                   duration: 0.5,
                   ease: dignifiedEase,
                 }}
-                className="mt-12 text-center"
+                className="mt-8 pt-8 border-t border-border"
               >
                 <a
                   href="tel:+18769520212"
-                  className="flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
                 >
                   <PhoneIcon size={16} />
                   <span>(876) 952-0212</span>
                 </a>
+                <p className="text-sm text-muted-foreground mb-4">
+                  37 Union Street, Montego Bay, Jamaica
+                </p>
                 <Link href="/contact">
-                  <Button className="rounded-md uppercase tracking-wider">
+                  <Button className="w-full rounded-md uppercase tracking-wider">
                     Contact Us
                   </Button>
                 </Link>
@@ -271,6 +302,162 @@ export function Navbar() {
   );
 }
 
+// Desktop Dropdown Navigation
+interface DropdownNavProps {
+  label: string;
+  items: { href: string; label: string }[];
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  pathname: string;
+}
+
+function DropdownNav({
+  label,
+  items,
+  isOpen,
+  onOpen,
+  onClose,
+  pathname,
+}: DropdownNavProps) {
+  const isActive = items.some((item) => pathname === item.href);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    onOpen();
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(onClose, 150);
+  };
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        className={cn(
+          "flex items-center gap-1 text-sm font-medium tracking-wide transition-colors",
+          isActive
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        {label}
+        <ChevronDownIcon
+          size={14}
+          className={cn(
+            "transition-transform duration-300",
+            isOpen && "rotate-180"
+          )}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2, ease: dignifiedEase }}
+            className="absolute top-full left-0 mt-2 py-2 min-w-[220px] bg-background/95 backdrop-blur-xl border border-border rounded-md shadow-lg"
+          >
+            {items.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "block px-4 py-2 text-sm transition-colors",
+                  pathname === item.href
+                    ? "text-funeral-gold bg-funeral-gold/5"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Mobile Dropdown
+interface MobileDropdownProps {
+  label: string;
+  items: { href: string; label: string }[];
+  isOpen: boolean;
+  onToggle: () => void;
+  pathname: string;
+}
+
+function MobileDropdown({
+  label,
+  items,
+  isOpen,
+  onToggle,
+  pathname,
+}: MobileDropdownProps) {
+  const isActive = items.some((item) => pathname === item.href);
+
+  return (
+    <div className="border-b border-border/50">
+      <button
+        onClick={onToggle}
+        className={cn(
+          "w-full flex items-center justify-between text-lg font-normal tracking-wide transition-colors py-3",
+          isActive
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        {label}
+        <ChevronDownIcon
+          size={18}
+          className={cn(
+            "transition-transform duration-300",
+            isOpen && "rotate-180"
+          )}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: dignifiedEase }}
+            className="overflow-hidden"
+          >
+            <div className="pl-4 pb-3 space-y-1">
+              {items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "block py-2 text-base transition-colors",
+                    pathname === item.href
+                      ? "text-funeral-gold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Simple Nav Link
 interface NavLinkProps {
   href: string;
   isActive: boolean;

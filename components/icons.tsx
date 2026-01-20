@@ -31,6 +31,15 @@ import {
   SentIcon as SentIconData,
   // Informational icons
   InformationCircleIcon as InformationCircleIconData,
+  // Dropdown icons
+  ArrowDown01Icon as ChevronDownIconData,
+  // Additional service icons
+  FireIcon as FireIconData,
+  FlowerIcon as FlowerIconData,
+  TreeIcon as TreeIconData,
+  MoreHorizontalCircle01Icon as MoreIconData,
+  GiftIcon as GiftIconData,
+  SchoolIcon as SchoolIconData,
 } from "@hugeicons/core-free-icons";
 
 interface IconProps {
@@ -146,4 +155,34 @@ export function SendIcon({ size = 18, className }: IconProps) {
 
 export function InfoIcon({ size = 18, className }: IconProps) {
   return <HugeiconsIcon icon={InformationCircleIconData} size={size} className={className} />;
+}
+
+// Dropdown icons
+export function ChevronDownIcon({ size = 16, className }: IconProps) {
+  return <HugeiconsIcon icon={ChevronDownIconData} size={size} className={className} />;
+}
+
+// Additional service icons
+export function FireIcon({ size = 24, className }: IconProps) {
+  return <HugeiconsIcon icon={FireIconData} size={size} className={className} />;
+}
+
+export function FlowerIcon({ size = 24, className }: IconProps) {
+  return <HugeiconsIcon icon={FlowerIconData} size={size} className={className} />;
+}
+
+export function TreeIcon({ size = 24, className }: IconProps) {
+  return <HugeiconsIcon icon={TreeIconData} size={size} className={className} />;
+}
+
+export function MoreIcon({ size = 24, className }: IconProps) {
+  return <HugeiconsIcon icon={MoreIconData} size={size} className={className} />;
+}
+
+export function GiftIcon({ size = 24, className }: IconProps) {
+  return <HugeiconsIcon icon={GiftIconData} size={size} className={className} />;
+}
+
+export function SchoolIcon({ size = 24, className }: IconProps) {
+  return <HugeiconsIcon icon={SchoolIconData} size={size} className={className} />;
 }
