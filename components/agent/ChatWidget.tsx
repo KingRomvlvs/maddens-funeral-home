@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { CloseIcon, SendIcon, ArrowDownIcon } from "@/components/icons";
+import { CloseIcon, SendIcon, ArrowDownIcon, DeleteIcon } from "@/components/icons";
 
 // Fallback responses when Convex is not configured
 const fallbackResponses: Record<string, string> = {
@@ -288,6 +288,13 @@ export function ChatWidget() {
     }
   };
 
+  const handleClearChat = useCallback(() => {
+    setMessages([]);
+    setConversationId(null);
+    setRemaining(null);
+    localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+  }, []);
+
   return (
     <>
       {/* Intro Popup */}
@@ -390,6 +397,15 @@ export function ChatWidget() {
                 <p className={`text-white font-medium ${isMobile ? "text-base" : "text-sm"}`}>Madden&apos;s Assistant</p>
                 <p className={`text-white/60 ${isMobile ? "text-sm" : "text-xs"}`}>Here to help 24/7</p>
               </div>
+              {messages.length > 0 && (
+                <button
+                  onClick={handleClearChat}
+                  className="text-white/60 hover:text-white transition-colors p-2"
+                  title="Clear chat"
+                >
+                  <DeleteIcon size={isMobile ? 22 : 18} />
+                </button>
+              )}
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-white/60 hover:text-white transition-colors p-2"

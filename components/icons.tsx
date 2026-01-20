@@ -40,6 +40,7 @@ import {
   MoreHorizontalCircle01Icon as MoreIconData,
   GiftIcon as GiftIconData,
   SchoolIcon as SchoolIconData,
+  Delete02Icon as Delete02IconData,
 } from "@hugeicons/core-free-icons";
 
 interface IconProps {
@@ -185,4 +186,8 @@ export function GiftIcon({ size = 24, className }: IconProps) {
 
 export function SchoolIcon({ size = 24, className }: IconProps) {
   return <HugeiconsIcon icon={SchoolIconData} size={size} className={className} />;
+}
+
+export function DeleteIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={Delete02IconData} size={size} className={className} />;
 }
