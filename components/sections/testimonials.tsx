@@ -3,6 +3,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { QuoteIcon } from "@/components/icons";
+import { Marquee } from "@/components/ui/marquee";
 
 const testimonials = [
   {
@@ -29,7 +30,41 @@ const testimonials = [
     author: "Marlene Morse",
     location: "Kingston",
   },
+  {
+    quote:
+      "The compassion and professionalism shown by the staff during our difficult time was remarkable. They truly went above and beyond.",
+    author: "The Williams Family",
+    location: "Montego Bay",
+  },
+  {
+    quote:
+      "Thank you for handling everything with such care and dignity. Your guidance made a very difficult time more bearable.",
+    author: "Sandra Brown",
+    location: "Kingston",
+  },
 ];
+
+function TestimonialCard({ testimonial }: { testimonial: typeof testimonials[0] }) {
+  return (
+    <div className="bg-background rounded-lg p-6 lg:p-8 border border-border w-[350px] shrink-0 h-full flex flex-col">
+      <QuoteIcon size={32} className="text-funeral-gold/30 mb-4" />
+      <blockquote className="text-muted-foreground font-light leading-relaxed mb-6 italic flex-1">
+        &ldquo;{testimonial.quote}&rdquo;
+      </blockquote>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-funeral-gold/10 flex items-center justify-center">
+          <span className="text-funeral-gold font-medium text-sm">
+            {testimonial.author.charAt(0)}
+          </span>
+        </div>
+        <div>
+          <p className="font-medium text-sm">{testimonial.author}</p>
+          <p className="text-xs text-muted-foreground">{testimonial.location}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function TestimonialsSection() {
   return (
@@ -55,44 +90,22 @@ export function TestimonialsSection() {
           </p>
         </motion.div>
 
-        {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {testimonials.map((testimonial, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.1,
-                ease: [0.4, 0, 0.2, 1],
-              }}
-              viewport={{ once: true }}
-              className="bg-background rounded-lg p-6 lg:p-8 border border-border"
-            >
-              <QuoteIcon
-                size={32}
-                className="text-funeral-gold/30 mb-4"
-              />
-              <blockquote className="text-muted-foreground font-light leading-relaxed mb-6 italic">
-                &ldquo;{testimonial.quote}&rdquo;
-              </blockquote>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-funeral-gold/10 flex items-center justify-center">
-                  <span className="text-funeral-gold font-medium text-sm">
-                    {testimonial.author.charAt(0)}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{testimonial.author}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {testimonial.location}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {/* Testimonials Marquee - slower for dignity */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+          viewport={{ once: true }}
+          className="relative"
+        >
+          <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-muted/30 to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-muted/30 to-transparent z-10" />
+          <Marquee pauseOnHover className="[--duration:60s] [--gap:1.5rem]">
+            {testimonials.map((testimonial, index) => (
+              <TestimonialCard key={index} testimonial={testimonial} />
+            ))}
+          </Marquee>
+        </motion.div>
       </div>
     </section>
   );
