@@ -71,18 +71,27 @@ maddens-funeral-home/
 │   │   ├── about/             # Company history & values
 │   │   ├── contact/           # Contact form & locations
 │   │   ├── pre-planning/      # Pre-planning information
-│   │   └── resources/         # Grief support & guides
+│   │   ├── resources/         # Grief support & guides
+│   │   └── marketplace/       # 3D product marketplace
+│   │       ├── caskets/       # Casket catalog + [slug]
+│   │       └── urns/          # Urn catalog + [slug]
 │   ├── layout.tsx             # Root layout (Theme provider)
 │   └── globals.css            # Tailwind v4 theme & utilities
 ├── components/
 │   ├── ui/                    # UI components (Button, etc.)
 │   ├── layout/                # Navbar, Footer
 │   ├── sections/              # Homepage sections
+│   ├── marketplace/           # 3D marketplace components
+│   │   └── 3d/                # R3F 3D components
 │   ├── icons.tsx              # HugeIcons wrapper components
 │   └── theme-provider.tsx     # next-themes provider
 ├── lib/
-│   └── utils.ts               # Utility functions (cn, etc.)
-└── public/                    # Static assets
+│   ├── utils.ts               # Utility functions (cn, etc.)
+│   └── marketplace/           # Product data, materials, types
+└── public/
+    ├── models/                # GLB 3D models
+    ├── textures/              # Material textures
+    └── images/                # Product images
 ```
 
 ---
@@ -91,7 +100,7 @@ maddens-funeral-home/
 
 ### (marketing) - Public Pages
 - **Layout:** TopBar + Navbar + Footer
-- **Pages:** /, /services, /about, /contact, /pre-planning, /resources
+- **Pages:** /, /services, /about, /contact, /pre-planning, /resources, /marketplace, /marketplace/caskets, /marketplace/urns
 
 ---
 
@@ -339,6 +348,96 @@ await ctx.runAction(internal.agent.rag.bulkIngest, {
 
 ---
 
+## 12.6 3D Product Marketplace
+
+### Overview
+Interactive 3D marketplace for viewing caskets and urns with material customization.
+
+### Technology Stack
+
+| Package | Purpose |
+|---------|---------|
+| `three` | 3D rendering engine |
+| `@react-three/fiber` | React wrapper for Three.js |
+| `@react-three/drei` | R3F helpers (Stage, OrbitControls, etc.) |
+
+### File Structure
+
+```
+lib/marketplace/
+├── types.ts              # Product, Material, Interior types
+├── materials.ts          # Material presets (wood, metal)
+├── products.ts           # Product catalog data
+├── utils.ts              # WebGL detection, helpers
+└── index.ts              # Export all
+
+components/marketplace/
+├── ProductViewer3D.tsx   # Main 3D viewer component
+├── ProductControls.tsx   # Material/interior swatches
+├── ProductCard.tsx       # Product catalog card
+├── ProductGrid.tsx       # Grid layout for products
+├── CategoryCard.tsx      # Category selection card
+└── 3d/
+    ├── Canvas3D.tsx      # R3F Canvas wrapper
+    ├── Environment3D.tsx # Stage lighting setup
+    ├── CameraControls.tsx # OrbitControls wrapper
+    ├── ProductModel.tsx  # GLTF loader + placeholder
+    ├── FallbackView.tsx  # Static image fallback
+    └── LoadingSpinner.tsx # Loading state
+```
+
+### Routes
+
+| Route | Content |
+|-------|---------|
+| `/marketplace` | Category selection (caskets, urns) |
+| `/marketplace/caskets` | Casket product catalog |
+| `/marketplace/caskets/[slug]` | Casket detail with 3D viewer |
+| `/marketplace/urns` | Urn product catalog |
+| `/marketplace/urns/[slug]` | Urn detail with 3D viewer |
+
+### Material Presets
+
+**Wood Materials:** Mahogany, Cherry, Oak, Walnut, Pine
+**Metal Materials:** Bronze, Copper, Brushed Silver, Polished Steel, Black Metal
+**Interior Fabrics:** White Velvet, Ivory Satin, Blush Velvet, Champagne Crepe
+
+### Adding New Products
+
+```typescript
+// lib/marketplace/products.ts
+export const casketProducts: Product[] = [
+  {
+    id: "unique-id",
+    slug: "url-slug",
+    category: "caskets",
+    subcategory: "wooden",
+    name: "Product Name",
+    description: "Description...",
+    features: ["Feature 1", "Feature 2"],
+    priceRange: "Contact for pricing",
+    modelPath: "/models/caskets/model.glb",  // GLB file path
+    fallbackImage: "/images/caskets/image.jpg",
+    materials: woodMaterials,
+    interiors: interiorPresets,
+    defaultMaterialId: "mahogany",
+    defaultInteriorId: "white-velvet",
+  },
+];
+```
+
+### WebGL Fallback
+The `ProductViewer3D` component automatically detects WebGL support and falls back to a static image when unavailable. Use `detectWebGLSupport()` from `lib/marketplace/utils.ts`.
+
+### 3D Model Notes
+- Models should be in GLB format (< 500KB)
+- Target < 50,000 triangles per model
+- If no GLB file exists, placeholder geometry is rendered
+- Placeholder casket: box with handles
+- Placeholder urn: cylinder with dome lid
+
+---
+
 ## 13. Environment Variables
 
 ### Next.js (.env.local)
@@ -383,6 +482,9 @@ SITE_URL=https://maddensfuneralhome.com   # For API headers
 | Set Convex env var | `npx convex env set KEY value` |
 | View Convex logs | `npx convex logs` |
 | Add to AI knowledge | Run `internal.agent.rag.ingest` action |
+| Add marketplace product | Edit `lib/marketplace/products.ts` |
+| Add material preset | Edit `lib/marketplace/materials.ts` |
+| Update 3D components | Edit `components/marketplace/3d/` |
 
 ---
 
@@ -396,4 +498,4 @@ SITE_URL=https://maddensfuneralhome.com   # For API headers
 ---
 
 *Last Updated: January 2026*
-*Built with: Next.js 16, Tailwind v4, Framer Motion, HugeIcons*
+*Built with: Next.js 16, Tailwind v4, Framer Motion, HugeIcons, React Three Fiber*

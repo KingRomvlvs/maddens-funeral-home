@@ -51,6 +51,7 @@ A modern, dignified website for Madden's Funeral Home & Crematorium that honors 
 | Logo Integration | [x] Complete | High | Brand logo in navbar and footer |
 | CEO Tribute | [x] Complete | Medium | Leslie Ruel Madden Jr. tribute section |
 | Awards Section | [x] Complete | Medium | Recognition & awards on About page |
+| 3D Product Marketplace | [x] Complete | High | Interactive 3D caskets/urns with material customization |
 | Contact Form Backend | [ ] Pending | High | Email notifications to staff |
 | Image Gallery | [ ] Pending | Medium | Facility photos, chapel images |
 | Testimonials CMS | [ ] Pending | Low | Admin-managed testimonials |
@@ -92,6 +93,8 @@ A modern, dignified website for Madden's Funeral Home & Crematorium that honors 
 | AI Chat | Convex + OpenRouter API (gpt-4o-mini) |
 | Backend | Convex (schema, actions, rate limiting) |
 | RAG/Vector Database | Convex vector search + OpenRouter embeddings |
+| 3D Product Viewer | React Three Fiber + Drei |
+| 3D Models | GLTF/GLB with placeholder geometry fallback |
 
 ### 3.3 Pending
 
@@ -194,6 +197,25 @@ Each service includes: description, key features, CTA
 3. Grief & Healing - Support articles
 4. Planning Resources - Checklists
 
+### 5.7 Marketplace (/marketplace)
+
+**Pages:**
+1. Marketplace Landing - Category selection (caskets, urns)
+2. Caskets Catalog - Grid of casket products
+3. Urns Catalog - Grid of urn products
+4. Product Detail - 3D viewer with customization
+
+**3D Viewer Features:**
+- Orbit controls (rotate, zoom)
+- Material swatches (wood, metal finishes)
+- Interior fabric options (caskets only)
+- WebGL fallback to static images
+- Touch gesture support on mobile
+
+**Products:**
+- Caskets: Classic Mahogany, Heritage Oak, Presidential Bronze, Stainless Elegance
+- Urns: Serenity Bronze, Heritage Mahogany, Classic Silver
+
 ---
 
 ## 6. Deployment Checklist
@@ -236,6 +258,18 @@ Each service includes: description, key features, CTA
 ---
 
 ## 8. Changelog
+
+### v1.3.0 (January 2026)
+- Added 3D Product Marketplace with interactive viewer
+  - React Three Fiber + Drei for 3D rendering
+  - Interactive casket and urn 3D models with orbit controls
+  - Material customization (wood, metal, stainless steel finishes)
+  - Interior fabric options for caskets (velvet, satin, crepe)
+  - WebGL detection with static image fallback
+  - Responsive design with touch gesture support
+  - Product catalog with category pages
+  - Routes: /marketplace, /marketplace/caskets, /marketplace/urns
+  - 4 casket products + 3 urn products with 3D views
 
 ### v1.2.0 (January 2026)
 - Added RAG/Vector Database system for AI knowledge base
