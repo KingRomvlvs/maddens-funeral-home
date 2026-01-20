@@ -41,12 +41,12 @@ export const sendManualReply = action({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Madden's Funeral Home <noreply@maddensfuneralhome.com>",
+          from: "Madden's Funeral Home <noreply@876maddens.com>",
           to: [submission.email],
           subject: args.subject,
           html: args.bodyHtml,
           text: args.bodyText,
-          reply_to: "info@maddensfuneralhome.com",
+          reply_to: "info@876maddens.com",
         }),
       });
 
@@ -114,7 +114,7 @@ export const sendAutoReply = action({
       return { success: false, reason: "Email service not configured" };
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://maddensfuneralhome.com";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://876maddens.com";
 
     const bodyHtml = `
       <!DOCTYPE html>
@@ -188,12 +188,12 @@ ${siteUrl}
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Madden's Funeral Home <noreply@maddensfuneralhome.com>",
+          from: "Madden's Funeral Home <noreply@876maddens.com>",
           to: [submission.email],
           subject: `Thank you for contacting Madden's Funeral Home`,
           html: bodyHtml,
           text: bodyText,
-          reply_to: "info@maddensfuneralhome.com",
+          reply_to: "info@876maddens.com",
         }),
       });
 
