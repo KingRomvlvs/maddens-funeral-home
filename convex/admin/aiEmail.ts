@@ -131,7 +131,7 @@ ${submission.message}
 
 Please write a thoughtful, helpful response that addresses their inquiry using the business information provided.`;
 
-    const aiResponse = await generateAIResponse([
+    let aiResponse = await generateAIResponse([
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ]);
@@ -139,6 +139,13 @@ Please write a thoughtful, helpful response that addresses their inquiry using t
     if (!aiResponse) {
       return { success: false, reason: "Failed to generate AI response" };
     }
+
+    // Strip any greeting the AI might have included (template adds "Dear [name]" already)
+    aiResponse = aiResponse
+      .replace(/^Dear\s+[^,\n]+,?\s*/i, "")
+      .replace(/^Hello\s+[^,\n]+,?\s*/i, "")
+      .replace(/^Hi\s+[^,\n]+,?\s*/i, "")
+      .trim();
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://876maddens.com";
 
@@ -364,7 +371,7 @@ ${submission.message}`;
       userPrompt += `\n\nAdditional context from staff: ${args.additionalContext}`;
     }
 
-    const draft = await generateAIResponse(
+    let draft = await generateAIResponse(
       [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -375,6 +382,13 @@ ${submission.message}`;
     if (!draft) {
       return { success: false, reason: "Failed to generate draft" };
     }
+
+    // Strip any greeting the AI might have included (template adds "Dear [name]" already)
+    draft = draft
+      .replace(/^Dear\s+[^,\n]+,?\s*/i, "")
+      .replace(/^Hello\s+[^,\n]+,?\s*/i, "")
+      .replace(/^Hi\s+[^,\n]+,?\s*/i, "")
+      .trim();
 
     return { success: true, draft };
   },
