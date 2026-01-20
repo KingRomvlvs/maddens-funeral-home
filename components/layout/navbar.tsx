@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
@@ -99,14 +100,14 @@ export function Navbar() {
         <nav className="h-full max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex flex-col">
-              <span className="text-lg md:text-xl font-normal tracking-wide">
-                Madden&apos;s
-              </span>
-              <span className="text-xs tracking-[0.15em] uppercase text-muted-foreground">
-                Funeral Home & Crematorium
-              </span>
-            </div>
+            <Image
+              src="/images/mfh-logo.png"
+              alt="Madden's Funeral Home"
+              width={180}
+              height={60}
+              className="h-12 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}

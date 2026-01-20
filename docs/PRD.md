@@ -42,16 +42,19 @@ A modern, dignified website for Madden's Funeral Home & Crematorium that honors 
 | Navigation | [x] Complete | Fixed navbar with top contact bar |
 | Footer | [x] Complete | All locations, social links |
 
-### 2.2 Phase 2: Enhanced Features - PENDING
+### 2.2 Phase 2: Enhanced Features - IN PROGRESS
 
 | Feature | Status | Priority | Notes |
 |---------|--------|----------|-------|
+| Interactive Map | [x] Complete | Medium | Leaflet maps showing both locations |
+| AI Chat Widget | [x] Complete | High | Convex-powered AI assistant with topic filtering |
+| Logo Integration | [x] Complete | High | Brand logo in navbar and footer |
+| CEO Tribute | [x] Complete | Medium | Leslie Ruel Madden Jr. tribute section |
+| Awards Section | [x] Complete | Medium | Recognition & awards on About page |
 | Contact Form Backend | [ ] Pending | High | Email notifications to staff |
-| Google Maps Integration | [ ] Pending | Medium | Interactive maps for both locations |
 | Image Gallery | [ ] Pending | Medium | Facility photos, chapel images |
 | Testimonials CMS | [ ] Pending | Low | Admin-managed testimonials |
 | Blog/News Section | [ ] Pending | Low | Community updates, grief articles |
-| Live Chat Widget | [ ] Pending | Low | 24/7 support integration |
 
 ### 2.3 Phase 3: Advanced Features - FUTURE
 
@@ -81,7 +84,15 @@ A modern, dignified website for Madden's Funeral Home & Crematorium that honors 
 | Build System | Bun |
 | Dev Port | 3005 |
 
-### 3.2 Pending
+### 3.2 Recently Implemented
+
+| Requirement | Implementation |
+|-------------|----------------|
+| Interactive Maps | Leaflet + react-leaflet |
+| AI Chat | Convex + OpenRouter API |
+| Backend | Convex (schema, actions, rate limiting) |
+
+### 3.3 Pending
 
 | Requirement | Planned Implementation |
 |-------------|----------------------|
@@ -224,6 +235,23 @@ Each service includes: description, key features, CTA
 ---
 
 ## 8. Changelog
+
+### v1.1.0 (January 2026)
+- Added AI Chat Widget with Convex integration
+  - Topic filtering to conserve tokens (only responds to funeral-related queries)
+  - Rate limiting (10 messages per hour for anonymous users)
+  - Conversation persistence in database
+  - Fallback to simulated responses when Convex not configured
+  - Full-screen mobile experience
+- Added Interactive Map (Leaflet)
+  - Shows Montego Bay and Kingston locations
+  - Custom markers with brand colors
+  - Location toggle buttons
+- Added brand logo to navbar and footer
+- Added CEO tribute section for Leslie Ruel Madden Jr.
+- Added Awards & Recognition section (Howard University IMPACT Award)
+- Updated hero section with new image layout
+- Added additional pages: Caskets, Urns, Cremation, Cemetery, Eulogy Tips, Christmas Treat, Foundation
 
 ### v1.0.0 (January 2026)
 - Initial release with all Phase 1 features

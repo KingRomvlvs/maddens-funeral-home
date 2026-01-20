@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   PhoneIcon,
@@ -68,12 +69,13 @@ export function Footer() {
             viewport={{ once: true }}
           >
             <Link href="/" className="block mb-6">
-              <h3 className="text-xl font-normal tracking-wide">
-                Madden&apos;s
-              </h3>
-              <p className="text-xs tracking-[0.15em] uppercase text-white/70">
-                Funeral Home & Crematorium
-              </p>
+              <Image
+                src="/images/mfh-logo.png"
+                alt="Madden's Funeral Home"
+                width={200}
+                height={70}
+                className="h-16 w-auto object-contain brightness-0 invert"
+              />
             </Link>
             <p className="text-white/70 font-light text-sm leading-relaxed mb-4">
               Helping families and friends honor their loved ones with dignity

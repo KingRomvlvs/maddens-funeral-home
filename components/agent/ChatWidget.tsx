@@ -1,10 +1,28 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { CloseIcon, SendIcon, ArrowDownIcon } from "@/components/icons";
+
+// Fallback responses when Convex is not configured
+const fallbackResponses: Record<string, string> = {
+  "What services do you offer?":
+    "Madden's Funeral Home offers a comprehensive range of services including traditional funerals, cremation services, graveside services, repatriation for international arrangements, pre-planning consultations, and cemetery services at Dovecot Memorial Park. We've been serving Jamaican families for over 90 years with dignity and compassion.",
+  "How do I plan a funeral?":
+    "Planning a funeral can feel overwhelming, but we're here to help. Start by contacting us at (876) 952-0212 (Montego Bay) or (876) 926-2079 (Kingston). We'll guide you through every step, from selecting services to arranging the ceremony. You can also visit our 'When Someone Dies' page for immediate guidance.",
+  "What are your locations?":
+    "We have multiple locations to serve you:\n\nMontego Bay: 37 Union Street, Montego Bay\nPhone: (876) 952-0212\n\nKingston: 42a Constant Spring Road, Kingston 10\nPhone: (876) 926-2079\n\nAll locations are available 24/7.",
+  "Tell me about cremation options":
+    "We offer three cremation service options:\n\n1. Before Cremation: Traditional viewing and service before cremation\n2. After Cremation: Service held after cremation with the urn present\n3. Direct Cremation: Cremation without a formal service\n\nOur Dovecot Memorial Park in Montego Bay houses a modern crematorium with options including columbarium niches and urn gardens.",
+  "How can I pre-plan arrangements?":
+    "Pre-planning allows you to make thoughtful decisions about your final arrangements while relieving your family of this burden. Benefits include:\n\n- Peace of mind knowing your wishes will be honored\n- Protection of your family from difficult decisions\n- Locked-in pricing\n- Flexible payment options\n\nContact us to schedule a no-obligation consultation.",
+  "What is the Christmas Treat program?":
+    "The Christmas Treat is an annual community initiative started by our founder. Every December, we distribute food packages to over 500 economically disadvantaged elderly and disabled members of our community. This tradition has grown from 250 recipients in its first year to over 1,000 people. It's our way of giving back to the community that has supported us for over 90 years.",
+};
+
+const defaultFallbackResponse = "Thank you for your question. Our team is here to help you 24/7. For immediate assistance, please call us at (876) 952-0212 (Montego Bay) or (876) 926-2079 (Kingston). We'll be happy to assist you with any questions about our services.";
 
 interface Message {
   id: string;
@@ -22,6 +40,54 @@ const presetQuestions = [
   "What is the Christmas Treat program?",
 ];
 
+// Generate or get session ID
+function getSessionId(): string {
+  if (typeof window === "undefined") return "";
+
+  const storageKey = "maddens-session-id";
+  let sessionId = localStorage.getItem(storageKey);
+
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem(storageKey, sessionId);
+  }
+
+  return sessionId;
+}
+
+// Storage key for conversation persistence
+const CONVERSATION_STORAGE_KEY = "maddens-chat-conversation";
+
+interface StoredConversation {
+  conversationId: string;
+  messages: Message[];
+  updatedAt: number;
+}
+
+// Hook to use Convex if available
+function useConvexChat() {
+  const [isConvexAvailable, setIsConvexAvailable] = useState(false);
+  const [askAction, setAskAction] = useState<any>(null);
+
+  useEffect(() => {
+    // Check if Convex URL is configured
+    if (process.env.NEXT_PUBLIC_CONVEX_URL) {
+      import("convex/react").then((convexReact) => {
+        import("@/convex/_generated/api").then((convexApi) => {
+          setAskAction(() => convexApi.api.agent.chat.ask);
+          setIsConvexAvailable(true);
+        }).catch(() => {
+          // API not generated yet
+        });
+      }).catch(() => {
+        // Convex not available
+      });
+    }
+  }, []);
+
+  return { isConvexAvailable, askAction };
+}
+
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -29,8 +95,51 @@ export function ChatWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [sessionId, setSessionId] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [remaining, setRemaining] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const { isConvexAvailable, askAction } = useConvexChat();
+
+  // Initialize session ID and load stored conversation
+  useEffect(() => {
+    const sid = getSessionId();
+    setSessionId(sid);
+
+    // Load stored conversation
+    const stored = localStorage.getItem(CONVERSATION_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed: StoredConversation = JSON.parse(stored);
+        // Only restore if less than 24 hours old
+        if (Date.now() - parsed.updatedAt < 24 * 60 * 60 * 1000) {
+          setMessages(parsed.messages.map(m => ({
+            ...m,
+            timestamp: new Date(m.timestamp),
+          })));
+          if (parsed.conversationId) {
+            setConversationId(parsed.conversationId);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to restore conversation:", e);
+      }
+    }
+  }, []);
+
+  // Save conversation to localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      const stored: StoredConversation = {
+        conversationId: conversationId || "",
+        messages,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify(stored));
+    }
+  }, [messages, conversationId]);
 
   // Check if mobile
   useEffect(() => {
@@ -84,9 +193,14 @@ export function ChatWidget() {
     }
   }, [isOpen]);
 
-  const handleSend = async (text?: string) => {
+  // Fallback response handler
+  const handleFallbackResponse = useCallback((messageText: string): string => {
+    return fallbackResponses[messageText] || defaultFallbackResponse;
+  }, []);
+
+  const handleSend = useCallback(async (text?: string) => {
     const messageText = text || input.trim();
-    if (!messageText) return;
+    if (!messageText || isTyping) return;
 
     // Add user message
     const userMessage: Message = {
@@ -99,26 +213,49 @@ export function ChatWidget() {
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI response (will be replaced with Convex integration)
-    setTimeout(() => {
-      const responses: Record<string, string> = {
-        "What services do you offer?":
-          "Madden's Funeral Home offers a comprehensive range of services including traditional funerals, cremation services, graveside services, repatriation for international arrangements, pre-planning consultations, and cemetery services. We've been serving Jamaican families for over 90 years with dignity and compassion.",
-        "How do I plan a funeral?":
-          "Planning a funeral can feel overwhelming, but we're here to help. Start by contacting us at (876) 952-0212 (Montego Bay) or (876) 926-2079 (Kingston). We'll guide you through every step, from selecting services to arranging the ceremony. You can also visit our 'When Someone Dies' page for immediate guidance.",
-        "What are your locations?":
-          "We have multiple locations to serve you:\n\n**Montego Bay:** 37 Union Street, Montego Bay\nPhone: (876) 952-0212\n\n**Kingston:** 42a Constant Spring Road, Kingston 10\nPhone: (876) 926-2079\n\nWe also have facilities in Lucea. All locations are available 24/7.",
-        "Tell me about cremation options":
-          "We offer three cremation service options:\n\n1. **Before Cremation:** Traditional viewing and service before cremation\n2. **After Cremation:** Service held after cremation with the urn present\n3. **Direct Cremation:** Cremation without a formal service\n\nOur Dovecot Memorial Park in Montego Bay houses a modern crematorium with options including columbarium niches and urn gardens.",
-        "How can I pre-plan arrangements?":
-          "Pre-planning allows you to make thoughtful decisions about your final arrangements while relieving your family of this burden. Benefits include:\n\n- Peace of mind knowing your wishes will be honored\n- Protection of your family from difficult decisions\n- Locked-in pricing\n- Flexible payment options\n\nContact us to schedule a no-obligation consultation.",
-        "What is the Christmas Treat program?":
-          "The Christmas Treat is an annual community initiative started by our founder. Every December, we distribute food packages to over 500 economically disadvantaged elderly and disabled members of our community. This tradition has grown from 250 recipients in its first year to over 1,000 people. It's our way of giving back to the community that has supported us for over 90 years.",
-      };
+    try {
+      // Try Convex if available
+      if (isConvexAvailable && askAction) {
+        // Dynamic import to use the action
+        const { useAction } = await import("convex/react");
 
-      const response = responses[messageText] ||
-        "Thank you for your question. Our team is here to help you 24/7. For immediate assistance, please call us at (876) 952-0212 (Montego Bay) or (876) 926-2079 (Kingston). We'll be happy to assist you with any questions about our services.";
+        // Call the API directly
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: messageText,
+            conversationId: conversationId ?? undefined,
+            sessionId,
+          }),
+        });
 
+        if (response.ok) {
+          const result = await response.json();
+
+          if (result.conversationId && result.conversationId !== conversationId) {
+            setConversationId(result.conversationId);
+          }
+
+          if (typeof result.remaining === "number") {
+            setRemaining(result.remaining);
+          }
+
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: result.response,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          return;
+        }
+      }
+
+      // Fallback to simulated responses
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+
+      const response = handleFallbackResponse(messageText);
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -126,9 +263,23 @@ export function ChatWidget() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+
+    } catch (error) {
+      console.error("Chat error:", error);
+
+      // Use fallback on error
+      const response = handleFallbackResponse(messageText);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: response,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
+    }
+  }, [input, isTyping, conversationId, sessionId, isConvexAvailable, askAction, handleFallbackResponse]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -328,6 +479,9 @@ export function ChatWidget() {
                 </Button>
               </div>
               <p className={`text-muted-foreground text-center ${isMobile ? "text-xs mt-3" : "text-[10px] mt-2"}`}>
+                {remaining !== null && remaining <= 3 && (
+                  <span className="text-funeral-gold">{remaining} messages remaining • </span>
+                )}
                 Powered by AI • For urgent matters, call (876) 952-0212
               </p>
             </div>

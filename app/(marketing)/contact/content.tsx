@@ -10,6 +10,7 @@ import {
   ClockIcon,
   SendIcon,
 } from "@/components/icons";
+import { LocationMap } from "@/components/map/LocationMap";
 
 const locations = [
   {
@@ -296,24 +297,22 @@ export function ContactPageContent() {
         </div>
       </section>
 
-      {/* Map Section Placeholder */}
+      {/* Map Section */}
       <section className="max-w-7xl mx-auto px-6 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
           viewport={{ once: true }}
-          className="bg-muted/30 rounded-lg p-8 text-center"
+          className="bg-muted/30 rounded-lg p-8"
         >
-          <h2 className="text-2xl font-light mb-4">Visit Our Locations</h2>
-          <p className="text-muted-foreground font-light mb-6">
-            Our facilities are open for visitation and viewing services.
-          </p>
-          <div className="aspect-[21/9] bg-funeral-navy/5 dark:bg-funeral-navy/20 rounded-md flex items-center justify-center">
-            <p className="text-muted-foreground text-sm">
-              Interactive map coming soon
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-light mb-4">Visit Our Locations</h2>
+            <p className="text-muted-foreground font-light">
+              Our facilities are open for visitation and viewing services.
             </p>
           </div>
+          <LocationMap />
         </motion.div>
       </section>
     </div>
