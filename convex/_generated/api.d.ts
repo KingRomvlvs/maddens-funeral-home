@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as admin_aiEmail from "../admin/aiEmail.js";
+import type * as admin_aiEmailDb from "../admin/aiEmailDb.js";
 import type * as admin_email from "../admin/email.js";
 import type * as admin_emailDb from "../admin/emailDb.js";
 import type * as admin_inbox from "../admin/inbox.js";
@@ -26,6 +28,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/aiEmail": typeof admin_aiEmail;
+  "admin/aiEmailDb": typeof admin_aiEmailDb;
   "admin/email": typeof admin_email;
   "admin/emailDb": typeof admin_emailDb;
   "admin/inbox": typeof admin_inbox;

@@ -20,9 +20,9 @@ export const submit = mutation({
       createdAt: Date.now(),
     });
 
-    // Trigger auto-reply (fire and forget - don't block the submission)
-    // Note: This will be handled by the action scheduler
-    ctx.scheduler.runAfter(0, api.admin.email.sendAutoReply, {
+    // Trigger AI auto-reply (fire and forget - don't block the submission)
+    // Uses RAG to generate a contextual response based on the user's question
+    ctx.scheduler.runAfter(0, api.admin.aiEmail.sendAIAutoReply, {
       contactSubmissionId: submissionId,
     });
 

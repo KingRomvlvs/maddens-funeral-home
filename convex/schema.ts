@@ -43,9 +43,16 @@ export default defineSchema({
     // Response tracking
     respondedAt: v.optional(v.number()),
     respondedBy: v.optional(v.string()),
-    // Automated response
+    // Automated response (simple template)
     autoReplySent: v.optional(v.boolean()),
     autoReplySentAt: v.optional(v.number()),
+    // AI-powered response
+    aiReplySent: v.optional(v.boolean()),
+    aiReplySentAt: v.optional(v.number()),
+    aiReplyContent: v.optional(v.string()), // The AI-generated response
+    // AI summary (generated on demand by admin)
+    aiSummary: v.optional(v.string()),
+    aiSummaryGeneratedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
   })
@@ -65,9 +72,13 @@ export default defineSchema({
     bodyText: v.optional(v.string()),
     emailType: v.union(
       v.literal("auto_reply"),
+      v.literal("ai_reply"),
       v.literal("manual_reply"),
       v.literal("follow_up")
     ),
+    // AI assistance tracking
+    aiAssisted: v.optional(v.boolean()), // Was AI used to draft this reply?
+    aiDraftContent: v.optional(v.string()), // Original AI draft before editing
     resendId: v.optional(v.string()),
     resendStatus: v.union(
       v.literal("pending"),

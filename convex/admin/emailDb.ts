@@ -22,6 +22,7 @@ export const logEmail = internalMutation({
     bodyText: v.optional(v.string()),
     emailType: v.union(
       v.literal("auto_reply"),
+      v.literal("ai_reply"),
       v.literal("manual_reply"),
       v.literal("follow_up")
     ),

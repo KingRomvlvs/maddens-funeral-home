@@ -15,8 +15,13 @@ import {
   ArchiveIcon,
   SendIcon,
   DeleteIcon,
+  SparklesIcon,
+  SummaryIcon,
+  HistoryIcon,
+  AiEditIcon,
 } from "@/components/icons";
 import { Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
 
 export default function MessageDetailContent() {
   const router = useRouter();
@@ -25,14 +30,24 @@ export default function MessageDetailContent() {
   const { user } = useAuth();
 
   const submission = useQuery(api.admin.inbox.get, { id });
+  const conversationHistory = useQuery(
+    api.admin.aiEmailDb.getConversationHistory,
+    submission ? { email: submission.email } : "skip"
+  );
   const archive = useMutation(api.admin.inbox.archive);
   const remove = useMutation(api.admin.inbox.remove);
   const sendEmail = useAction(api.admin.email.sendManualReply);
+  const generateSummary = useAction(api.admin.aiEmail.generateSummary);
+  const generateDraftReply = useAction(api.admin.aiEmail.generateDraftReply);
 
   const [showReplyForm, setShowReplyForm] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [generatingDraft, setGeneratingDraft] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
 
   if (!submission) {
     return (
@@ -41,6 +56,46 @@ export default function MessageDetailContent() {
       </div>
     );
   }
+
+  const handleGenerateSummary = async () => {
+    if (submission.aiSummary) {
+      setSummary(submission.aiSummary);
+      return;
+    }
+    setGeneratingSummary(true);
+    try {
+      const result = await generateSummary({ contactSubmissionId: id });
+      if (result.success && result.summary) {
+        setSummary(result.summary);
+      } else {
+        alert(result.reason || "Failed to generate summary");
+      }
+    } catch (error) {
+      console.error("Failed to generate summary:", error);
+      alert("Failed to generate summary. Please try again.");
+    } finally {
+      setGeneratingSummary(false);
+    }
+  };
+
+  const handleGenerateDraft = async () => {
+    setGeneratingDraft(true);
+    try {
+      const result = await generateDraftReply({ contactSubmissionId: id });
+      if (result.success && result.draft) {
+        setReplySubject(`Re: ${submission.subject}`);
+        setReplyMessage(result.draft);
+        setShowReplyForm(true);
+      } else {
+        alert(result.reason || "Failed to generate draft");
+      }
+    } catch (error) {
+      console.error("Failed to generate draft:", error);
+      alert("Failed to generate draft. Please try again.");
+    } finally {
+      setGeneratingDraft(false);
+    }
+  };
 
   const handleSendReply = async () => {
     if (!replySubject.trim() || !replyMessage.trim()) return;
@@ -61,7 +116,7 @@ export default function MessageDetailContent() {
           <p style="font-size: 14px; color: #6b7280;">
             <strong>Madden's Funeral Home & Crematorium</strong><br>
             Serving Jamaican Families for Over 70 Years<br>
-            <a href="https://maddensfuneralhome.com" style="color: #b8860b;">www.maddensfuneralhome.com</a>
+            <a href="https://876maddens.com" style="color: #b8860b;">www.876maddens.com</a>
           </p>
         </body>
         </html>
@@ -114,6 +169,20 @@ export default function MessageDetailContent() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowHistory(!showHistory)}
+            className={cn(showHistory && "bg-funeral-gold/10")}
+          >
+            <HistoryIcon size={16} />
+            History
+            {conversationHistory && conversationHistory.totalInteractions > 1 && (
+              <span className="ml-1 rounded-full bg-funeral-gold/20 px-1.5 text-xs">
+                {conversationHistory.totalInteractions}
+              </span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               setReplySubject(`Re: ${submission.subject}`);
               setShowReplyForm(true);
@@ -136,6 +205,47 @@ export default function MessageDetailContent() {
           </Button>
         </div>
       </div>
+
+      {/* Conversation History Panel */}
+      {showHistory && conversationHistory && (
+        <div className="rounded-lg border bg-muted/30 p-4">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <HistoryIcon size={18} />
+            Conversation History with {submission.email}
+          </h3>
+          <div className="space-y-3 max-h-64 overflow-y-auto">
+            {conversationHistory.timeline.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No previous interactions</p>
+            ) : (
+              conversationHistory.timeline.map((item, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "rounded-md p-3 text-sm",
+                    item.type === "submission"
+                      ? "bg-background border"
+                      : "bg-funeral-gold/10 border border-funeral-gold/20"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium">
+                      {item.type === "submission" ? "Incoming Message" : "Sent Email"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDateTime(item.timestamp)}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground truncate">
+                    {item.type === "submission"
+                      ? item.data.subject
+                      : item.data.subject}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Message Details */}
       <div className="rounded-lg border">
@@ -164,6 +274,12 @@ export default function MessageDetailContent() {
               >
                 {submission.status}
               </span>
+              {submission.aiReplySent && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600">
+                  <SparklesIcon size={12} />
+                  AI Replied
+                </span>
+              )}
               <span className="flex items-center gap-1">
                 <ClockIcon size={14} />
                 {formatDateTime(submission.createdAt)}
@@ -202,10 +318,53 @@ export default function MessageDetailContent() {
           </div>
         </div>
 
+        {/* AI Summary Section */}
+        <div className="border-b px-6 py-4 bg-purple-50/50 dark:bg-purple-950/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SummaryIcon size={16} className="text-purple-600" />
+              <span className="font-medium text-sm">AI Summary</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateSummary}
+              disabled={generatingSummary}
+              className="text-purple-600 border-purple-200 hover:bg-purple-50"
+            >
+              <SparklesIcon size={14} />
+              {generatingSummary ? "Generating..." : submission.aiSummary || summary ? "View" : "Generate"}
+            </Button>
+          </div>
+          {(summary || submission.aiSummary) && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {summary || submission.aiSummary}
+            </p>
+          )}
+        </div>
+
         {/* Message Content */}
         <div className="px-6 py-6">
           <p className="whitespace-pre-wrap">{submission.message}</p>
         </div>
+
+        {/* AI Response (if sent) */}
+        {submission.aiReplyContent && (
+          <div className="border-t px-6 py-4 bg-purple-50/50 dark:bg-purple-950/20">
+            <div className="flex items-center gap-2 mb-3">
+              <SparklesIcon size={16} className="text-purple-600" />
+              <span className="font-medium text-sm">AI Response Sent</span>
+              {submission.aiReplySentAt && (
+                <span className="text-xs text-muted-foreground">
+                  {formatDateTime(submission.aiReplySentAt)}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {submission.aiReplyContent}
+            </p>
+          </div>
+        )}
 
         {/* Response Info */}
         {submission.respondedAt && (
@@ -222,8 +381,18 @@ export default function MessageDetailContent() {
       {/* Reply Form */}
       {showReplyForm && (
         <div className="rounded-lg border">
-          <div className="border-b px-6 py-4">
+          <div className="border-b px-6 py-4 flex items-center justify-between">
             <h2 className="font-semibold">Send Reply</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateDraft}
+              disabled={generatingDraft}
+              className="text-purple-600 border-purple-200 hover:bg-purple-50"
+            >
+              <AiEditIcon size={14} />
+              {generatingDraft ? "Generating..." : "AI Draft"}
+            </Button>
           </div>
           <div className="p-6 space-y-4">
             <div>

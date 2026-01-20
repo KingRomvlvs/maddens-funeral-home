@@ -48,6 +48,10 @@ import {
   ViewIcon as ViewIconData,
   Mail02Icon as Mail02IconData,
   ArchiveIcon as ArchiveIconData,
+  MagicWand01Icon as MagicWand01IconData,
+  TextAlignJustifyCenterIcon as TextAlignJustifyCenterIconData,
+  Clock04Icon as Clock04IconData,
+  PencilEdit02Icon as PencilEdit02IconData,
 } from "@hugeicons/core-free-icons";
 
 interface IconProps {
@@ -226,4 +230,21 @@ export function ReplyIcon({ size = 18, className }: IconProps) {
 
 export function ArchiveIcon({ size = 18, className }: IconProps) {
   return <HugeiconsIcon icon={ArchiveIconData} size={size} className={className} />;
+}
+
+// AI icons
+export function SparklesIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={MagicWand01IconData} size={size} className={className} />;
+}
+
+export function SummaryIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={TextAlignJustifyCenterIconData} size={size} className={className} />;
+}
+
+export function HistoryIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={Clock04IconData} size={size} className={className} />;
+}
+
+export function AiEditIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={PencilEdit02IconData} size={size} className={className} />;
 }

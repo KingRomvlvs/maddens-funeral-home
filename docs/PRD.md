@@ -52,7 +52,8 @@ A modern, dignified website for Madden's Funeral Home & Crematorium that honors 
 | CEO Tribute | [x] Complete | Medium | Leslie Ruel Madden Jr. tribute section |
 | Awards Section | [x] Complete | Medium | Recognition & awards on About page |
 | 3D Product Marketplace | [x] Complete | High | Interactive 3D caskets/urns with material customization |
-| Contact Form Backend | [ ] Pending | High | Email notifications to staff |
+| Contact Form Backend | [x] Complete | High | Convex + Resend API with AI auto-reply |
+| Admin Dashboard | [x] Complete | High | Inbox, AI features, conversation history |
 | Image Gallery | [ ] Pending | Medium | Facility photos, chapel images |
 | Testimonials CMS | [ ] Pending | Low | Admin-managed testimonials |
 | Blog/News Section | [ ] Pending | Low | Community updates, grief articles |
@@ -258,6 +259,22 @@ Each service includes: description, key features, CTA
 ---
 
 ## 8. Changelog
+
+### v1.4.0 (January 2026)
+- Added Admin Dashboard with AI-powered email features
+  - Simple username/password authentication through Convex
+  - Contact form submissions stored in Convex database
+  - Admin inbox for viewing and managing submissions
+  - AI-powered auto-reply using RAG context
+    - Searches business info to answer customer questions
+    - Sends contextual, personalized email responses
+    - Triggered automatically on form submission
+  - AI summary generation (button to summarize long emails)
+  - AI draft reply assistant (generates reply template for admin editing)
+  - Conversation history by email address
+  - Resend API integration for email delivery
+  - Email logging with status tracking
+- Routes: /admin, /admin/inbox, /admin/inbox/[id], /sign-in
 
 ### v1.3.0 (January 2026)
 - Added 3D Product Marketplace with interactive viewer
