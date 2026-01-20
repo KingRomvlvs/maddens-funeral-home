@@ -10,6 +10,7 @@ import {
   FallbackView,
   LoadingSpinner,
 } from "./3d";
+import { Button } from "@/components/ui/button";
 import type { MaterialPreset, InteriorPreset, Product } from "@/lib/marketplace/types";
 import { detectWebGLSupport, getModelScale, getCameraPosition } from "@/lib/marketplace/utils";
 
@@ -28,6 +29,7 @@ export function ProductViewer3D({
 }: ProductViewer3DProps) {
   const [webglSupported, setWebglSupported] = React.useState<boolean | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
     setWebglSupported(detectWebGLSupport());
@@ -77,16 +79,31 @@ export function ProductViewer3D({
               interior={selectedInterior}
               scale={scale}
               category={product.category}
+              isOpen={isOpen}
             />
           </Environment3D>
           <CameraControls
-            autoRotate
+            autoRotate={!isOpen}
             autoRotateSpeed={0.5}
             minDistance={product.category === "caskets" ? 2 : 1.2}
             maxDistance={product.category === "caskets" ? 5 : 3}
           />
         </React.Suspense>
       </Canvas3D>
+
+      {/* Open/Close button for caskets */}
+      {product.category === "caskets" && (
+        <div className="absolute top-4 right-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsOpen(!isOpen)}
+            className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-md text-xs uppercase tracking-wider"
+          >
+            {isOpen ? "Close Lid" : "Open Lid"}
+          </Button>
+        </div>
+      )}
 
       {/* Controls hint */}
       <div className="absolute bottom-4 left-4 right-4 flex justify-center pointer-events-none">

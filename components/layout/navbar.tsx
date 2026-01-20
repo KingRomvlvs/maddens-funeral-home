@@ -33,6 +33,14 @@ const navItems = [
       { href: "/eulogy-tips", label: "Eulogy Tips" },
     ],
   },
+  {
+    label: "Marketplace",
+    dropdown: [
+      { href: "/marketplace", label: "Browse All Products" },
+      { href: "/marketplace/caskets", label: "Caskets Collection" },
+      { href: "/marketplace/urns", label: "Urns Collection" },
+    ],
+  },
   { href: "/cemetery", label: "Cemetery" },
   {
     label: "Community",
@@ -42,7 +50,6 @@ const navItems = [
     ],
   },
   { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export function Navbar() {

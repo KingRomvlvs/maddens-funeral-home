@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import * as THREE from "three";
-import { useGLTF, Center } from "@react-three/drei";
+import { useGLTF, Center, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { useSpring, animated } from "@react-spring/three";
 import type { MaterialPreset, InteriorPreset } from "@/lib/marketplace/types";
 
 interface ProductModelProps {
@@ -12,73 +13,229 @@ interface ProductModelProps {
   interior?: InteriorPreset;
   scale?: number;
   category: "caskets" | "urns";
+  isOpen?: boolean;
 }
+
+// Animated mesh component for the lid
+const AnimatedGroup = animated.group;
 
 function PlaceholderCasket({
   material,
   interior,
+  isOpen = false,
 }: {
   material: MaterialPreset;
   interior?: InteriorPreset;
+  isOpen?: boolean;
 }) {
-  const meshRef = React.useRef<THREE.Mesh>(null);
+  const groupRef = React.useRef<THREE.Group>(null);
 
+  // Animate lid opening/closing
+  const { lidRotation } = useSpring({
+    lidRotation: isOpen ? -Math.PI / 3 : 0,
+    config: { mass: 1, tension: 120, friction: 20 },
+  });
+
+  // Slow rotation when not interacting
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.1;
+    if (groupRef.current && !isOpen) {
+      groupRef.current.rotation.y += delta * 0.08;
     }
   });
 
-  const materialProps = React.useMemo(
-    () => ({
-      color: new THREE.Color(material.color),
-      metalness: material.metalness,
-      roughness: material.roughness,
-    }),
-    [material]
-  );
-
+  const bodyColor = new THREE.Color(material.color);
   const interiorColor = interior
     ? new THREE.Color(interior.color)
     : new THREE.Color("#f5f5f5");
+  const handleColor = new THREE.Color(
+    material.metalness > 0.5 ? material.color : "#8b6914"
+  );
+
+  // Casket dimensions (more realistic proportions)
+  const length = 2.2;
+  const width = 0.75;
+  const height = 0.55;
+  const lidHeight = 0.25;
+  const wallThickness = 0.06;
 
   return (
-    <group ref={meshRef}>
-      {/* Main casket body */}
-      <mesh position={[0, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[2.4, 0.6, 0.85]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      {/* Lid */}
-      <mesh position={[0, 0.4, 0]} castShadow>
-        <boxGeometry args={[2.45, 0.2, 0.9]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      {/* Interior visible through top cutout */}
-      <mesh position={[0, 0.1, 0]}>
-        <boxGeometry args={[2.2, 0.5, 0.7]} />
+    <group ref={groupRef}>
+      {/* ===== CASKET BASE ===== */}
+      {/* Main body - outer shell */}
+      <RoundedBox
+        args={[length, height, width]}
+        radius={0.04}
+        smoothness={4}
+        position={[0, height / 2, 0]}
+        castShadow
+        receiveShadow
+      >
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
+      </RoundedBox>
+
+      {/* Interior cavity */}
+      <RoundedBox
+        args={[
+          length - wallThickness * 2,
+          height - wallThickness,
+          width - wallThickness * 2,
+        ]}
+        radius={0.02}
+        smoothness={4}
+        position={[0, height / 2 + wallThickness / 2, 0]}
+      >
+        <meshStandardMaterial color={interiorColor} roughness={0.95} />
+      </RoundedBox>
+
+      {/* Interior pillow area */}
+      <mesh position={[length / 2 - 0.35, height - 0.02, 0]}>
+        <boxGeometry args={[0.5, 0.08, width - 0.2]} />
         <meshStandardMaterial color={interiorColor} roughness={0.9} />
       </mesh>
-      {/* Handles left */}
-      {[-0.9, -0.3, 0.3, 0.9].map((x, i) => (
-        <mesh key={`handle-left-${i}`} position={[x, 0, -0.45]}>
-          <boxGeometry args={[0.15, 0.1, 0.08]} />
-          <meshStandardMaterial
-            color={material.metalness > 0.5 ? material.color : "#8b6914"}
-            metalness={0.9}
-            roughness={0.3}
-          />
-        </mesh>
+
+      {/* Decorative base rail */}
+      <mesh position={[0, 0.06, 0]} castShadow>
+        <boxGeometry args={[length + 0.08, 0.08, width + 0.08]} />
+        <meshStandardMaterial
+          color={handleColor}
+          metalness={0.85}
+          roughness={0.25}
+        />
+      </mesh>
+
+      {/* ===== ANIMATED LID ===== */}
+      <AnimatedGroup
+        position={[0, height, -width / 2 + 0.02]}
+        rotation-x={lidRotation}
+      >
+        {/* Lid pivot point adjustment */}
+        <group position={[0, 0, width / 2 - 0.02]}>
+          {/* Main lid */}
+          <RoundedBox
+            args={[length + 0.02, lidHeight, width]}
+            radius={0.04}
+            smoothness={4}
+            position={[0, lidHeight / 2, 0]}
+            castShadow
+          >
+            <meshStandardMaterial
+              color={bodyColor}
+              metalness={material.metalness}
+              roughness={material.roughness}
+            />
+          </RoundedBox>
+
+          {/* Lid interior (visible when open) */}
+          <RoundedBox
+            args={[
+              length - wallThickness * 2,
+              lidHeight - wallThickness,
+              width - wallThickness * 2,
+            ]}
+            radius={0.02}
+            smoothness={4}
+            position={[0, wallThickness / 2, 0]}
+          >
+            <meshStandardMaterial color={interiorColor} roughness={0.95} />
+          </RoundedBox>
+
+          {/* Lid crown/dome detail */}
+          <mesh position={[0, lidHeight, 0]} castShadow>
+            <boxGeometry args={[length * 0.6, 0.04, width * 0.5]} />
+            <meshStandardMaterial
+              color={bodyColor}
+              metalness={material.metalness}
+              roughness={material.roughness}
+            />
+          </mesh>
+
+          {/* Decorative lid trim */}
+          <mesh position={[0, lidHeight / 2, 0]} castShadow>
+            <boxGeometry args={[length + 0.06, 0.03, width + 0.04]} />
+            <meshStandardMaterial
+              color={handleColor}
+              metalness={0.85}
+              roughness={0.25}
+            />
+          </mesh>
+        </group>
+      </AnimatedGroup>
+
+      {/* ===== HANDLES ===== */}
+      {/* Left side handles */}
+      {[-0.7, -0.2, 0.3, 0.8].map((x, i) => (
+        <group key={`handle-left-${i}`} position={[x, height / 2, -width / 2 - 0.04]}>
+          {/* Handle bar */}
+          <mesh castShadow>
+            <capsuleGeometry args={[0.025, 0.12, 8, 16]} />
+            <meshStandardMaterial
+              color={handleColor}
+              metalness={0.9}
+              roughness={0.2}
+            />
+          </mesh>
+          {/* Handle mount */}
+          <mesh position={[0, 0, 0.03]}>
+            <boxGeometry args={[0.08, 0.04, 0.04]} />
+            <meshStandardMaterial
+              color={handleColor}
+              metalness={0.9}
+              roughness={0.2}
+            />
+          </mesh>
+        </group>
       ))}
-      {/* Handles right */}
-      {[-0.9, -0.3, 0.3, 0.9].map((x, i) => (
-        <mesh key={`handle-right-${i}`} position={[x, 0, 0.45]}>
-          <boxGeometry args={[0.15, 0.1, 0.08]} />
-          <meshStandardMaterial
-            color={material.metalness > 0.5 ? material.color : "#8b6914"}
-            metalness={0.9}
-            roughness={0.3}
-          />
+
+      {/* Right side handles */}
+      {[-0.7, -0.2, 0.3, 0.8].map((x, i) => (
+        <group key={`handle-right-${i}`} position={[x, height / 2, width / 2 + 0.04]}>
+          <mesh castShadow>
+            <capsuleGeometry args={[0.025, 0.12, 8, 16]} />
+            <meshStandardMaterial
+              color={handleColor}
+              metalness={0.9}
+              roughness={0.2}
+            />
+          </mesh>
+          <mesh position={[0, 0, -0.03]}>
+            <boxGeometry args={[0.08, 0.04, 0.04]} />
+            <meshStandardMaterial
+              color={handleColor}
+              metalness={0.9}
+              roughness={0.2}
+            />
+          </mesh>
+        </group>
+      ))}
+
+      {/* End handles */}
+      <group position={[-length / 2 - 0.04, height / 2, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.025, 0.1, 8, 16]} />
+          <meshStandardMaterial color={handleColor} metalness={0.9} roughness={0.2} />
+        </mesh>
+      </group>
+      <group position={[length / 2 + 0.04, height / 2, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.025, 0.1, 8, 16]} />
+          <meshStandardMaterial color={handleColor} metalness={0.9} roughness={0.2} />
+        </mesh>
+      </group>
+
+      {/* ===== CORNER DECORATIONS ===== */}
+      {[
+        [-length / 2 + 0.08, 0.15, -width / 2 + 0.06],
+        [-length / 2 + 0.08, 0.15, width / 2 - 0.06],
+        [length / 2 - 0.08, 0.15, -width / 2 + 0.06],
+        [length / 2 - 0.08, 0.15, width / 2 - 0.06],
+      ].map((pos, i) => (
+        <mesh key={`corner-${i}`} position={pos as [number, number, number]} castShadow>
+          <boxGeometry args={[0.06, height * 0.4, 0.04]} />
+          <meshStandardMaterial color={handleColor} metalness={0.85} roughness={0.25} />
         </mesh>
       ))}
     </group>
@@ -90,45 +247,132 @@ function PlaceholderUrn({ material }: { material: MaterialPreset }) {
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.15;
+      meshRef.current.rotation.y += delta * 0.12;
     }
   });
 
-  const materialProps = React.useMemo(
-    () => ({
-      color: new THREE.Color(material.color),
-      metalness: material.metalness,
-      roughness: material.roughness,
-    }),
-    [material]
-  );
+  const bodyColor = new THREE.Color(material.color);
 
   return (
     <group ref={meshRef}>
-      {/* Base */}
+      {/* Decorative base */}
+      <mesh position={[0, -0.42, 0]} castShadow>
+        <cylinderGeometry args={[0.22, 0.25, 0.06, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
+      </mesh>
+
+      {/* Base pedestal */}
       <mesh position={[0, -0.35, 0]} castShadow>
-        <cylinderGeometry args={[0.25, 0.3, 0.1, 32]} />
-        <meshStandardMaterial {...materialProps} />
+        <cylinderGeometry args={[0.2, 0.22, 0.1, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
       </mesh>
-      {/* Body */}
-      <mesh position={[0, 0, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.3, 0.25, 0.6, 32]} />
-        <meshStandardMaterial {...materialProps} />
+
+      {/* Lower body */}
+      <mesh position={[0, -0.15, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.28, 0.2, 0.3, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
       </mesh>
-      {/* Shoulder */}
+
+      {/* Main body - widest part */}
+      <mesh position={[0, 0.1, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.28, 0.28, 0.35, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
+      </mesh>
+
+      {/* Upper body - taper */}
       <mesh position={[0, 0.35, 0]} castShadow>
-        <cylinderGeometry args={[0.2, 0.3, 0.1, 32]} />
-        <meshStandardMaterial {...materialProps} />
+        <cylinderGeometry args={[0.2, 0.28, 0.2, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
       </mesh>
+
       {/* Neck */}
       <mesh position={[0, 0.5, 0]} castShadow>
-        <cylinderGeometry args={[0.15, 0.2, 0.2, 32]} />
-        <meshStandardMaterial {...materialProps} />
+        <cylinderGeometry args={[0.14, 0.2, 0.15, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
       </mesh>
-      {/* Lid */}
-      <mesh position={[0, 0.65, 0]} castShadow>
-        <sphereGeometry args={[0.15, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial {...materialProps} />
+
+      {/* Neck rim */}
+      <mesh position={[0, 0.58, 0]} castShadow>
+        <torusGeometry args={[0.14, 0.02, 16, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
+      </mesh>
+
+      {/* Lid base */}
+      <mesh position={[0, 0.64, 0]} castShadow>
+        <cylinderGeometry args={[0.16, 0.15, 0.08, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
+      </mesh>
+
+      {/* Lid dome */}
+      <mesh position={[0, 0.72, 0]} castShadow>
+        <sphereGeometry args={[0.12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={material.metalness}
+          roughness={material.roughness}
+        />
+      </mesh>
+
+      {/* Lid finial */}
+      <mesh position={[0, 0.82, 0]} castShadow>
+        <sphereGeometry args={[0.04, 16, 16]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={Math.min(material.metalness + 0.1, 1)}
+          roughness={Math.max(material.roughness - 0.1, 0)}
+        />
+      </mesh>
+
+      {/* Decorative band */}
+      <mesh position={[0, 0.1, 0]}>
+        <torusGeometry args={[0.29, 0.015, 16, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={Math.min(material.metalness + 0.1, 1)}
+          roughness={Math.max(material.roughness - 0.1, 0)}
+        />
+      </mesh>
+
+      {/* Second decorative band */}
+      <mesh position={[0, -0.05, 0]}>
+        <torusGeometry args={[0.285, 0.012, 16, 32]} />
+        <meshStandardMaterial
+          color={bodyColor}
+          metalness={Math.min(material.metalness + 0.1, 1)}
+          roughness={Math.max(material.roughness - 0.1, 0)}
+        />
       </mesh>
     </group>
   );
@@ -161,12 +405,7 @@ function GLTFModel({
   }, [clonedScene, material]);
 
   return (
-    <primitive
-      object={clonedScene}
-      scale={scale}
-      castShadow
-      receiveShadow
-    />
+    <primitive object={clonedScene} scale={scale} castShadow receiveShadow />
   );
 }
 
@@ -176,6 +415,7 @@ export function ProductModel({
   interior,
   scale = 1,
   category,
+  isOpen = false,
 }: ProductModelProps) {
   const [useGltf, setUseGltf] = React.useState(false);
   const [gltfError, setGltfError] = React.useState(false);
@@ -202,7 +442,11 @@ export function ProductModel({
         {useGltf && !gltfError ? (
           <GLTFModel modelPath={modelPath} material={material} scale={1} />
         ) : category === "caskets" ? (
-          <PlaceholderCasket material={material} interior={interior} />
+          <PlaceholderCasket
+            material={material}
+            interior={interior}
+            isOpen={isOpen}
+          />
         ) : (
           <PlaceholderUrn material={material} />
         )}
