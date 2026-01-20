@@ -173,7 +173,7 @@ export function FoundationContent() {
             <Link href="/christmas-treat">
               <Button
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
               >
                 Christmas Treat Program
                 <ArrowRightIcon size={18} />

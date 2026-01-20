@@ -238,7 +238,7 @@ export function CremationContent() {
             <Link href="/urns">
               <Button
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
               >
                 View Urns
                 <ArrowRightIcon size={18} />

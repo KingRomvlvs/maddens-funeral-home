@@ -170,7 +170,7 @@ export function PrePlanningPageContent() {
                 <Link href="/contact" className="block">
                   <Button
                     variant="outline"
-                    className="w-full border-white/30 text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
+                    className="w-full border-white/30 bg-transparent text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
                   >
                     Request Consultation
                     <ArrowRightIcon size={18} />

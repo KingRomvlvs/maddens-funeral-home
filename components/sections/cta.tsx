@@ -38,7 +38,7 @@ export function CTASection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
               >
                 Contact Us Online
                 <ArrowRightIcon size={18} />

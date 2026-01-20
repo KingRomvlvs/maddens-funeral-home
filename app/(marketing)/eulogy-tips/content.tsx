@@ -230,7 +230,7 @@ export function EulogyTipsContent() {
             <Link href="/contact">
               <Button
                 variant="outline"
-                className="border-white/30 text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
+                className="border-white/30 bg-transparent text-white hover:bg-white/10 rounded-md uppercase tracking-wider"
               >
                 Contact Us
                 <ArrowRightIcon size={18} />
