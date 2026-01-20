@@ -98,8 +98,10 @@ export function ChatWidget() {
   const [sessionId, setSessionId] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const chatPanelRef = useRef<HTMLDivElement>(null);
 
   const { isConvexAvailable, askAction } = useConvexChat();
 
@@ -192,6 +194,35 @@ export function ChatWidget() {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Handle iOS keyboard with visualViewport API
+  useEffect(() => {
+    if (!isMobile || typeof window === "undefined") return;
+
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      // Calculate keyboard height from the difference between window and viewport
+      const keyboardH = window.innerHeight - viewport.height;
+      setKeyboardHeight(keyboardH > 0 ? keyboardH : 0);
+
+      // Scroll messages into view when keyboard opens
+      if (keyboardH > 0) {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    };
+
+    viewport.addEventListener("resize", handleResize);
+    viewport.addEventListener("scroll", handleResize);
+
+    return () => {
+      viewport.removeEventListener("resize", handleResize);
+      viewport.removeEventListener("scroll", handleResize);
+    };
+  }, [isMobile]);
 
   // Fallback response handler
   const handleFallbackResponse = useCallback((messageText: string): string => {
@@ -338,7 +369,12 @@ export function ChatWidget() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
-            transition={{ delay: isOpen ? 0 : 1, type: "spring", stiffness: 200 }}
+            transition={{
+              delay: isOpen ? 0 : (isMobile ? 0.15 : 0.5),
+              type: "spring",
+              stiffness: 260,
+              damping: 20
+            }}
             onClick={() => {
               setIsOpen(!isOpen);
               setShowIntro(false);
@@ -377,16 +413,21 @@ export function ChatWidget() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={chatPanelRef}
             initial={{ opacity: 0, y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             className={`fixed z-50 bg-background flex flex-col overflow-hidden ${
               isMobile
                 ? "inset-0"
                 : "bottom-24 right-6 w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[70vh] rounded-lg shadow-2xl border border-border"
             }`}
-            style={isMobile ? { paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" } : undefined}
+            style={isMobile ? {
+              paddingTop: "env(safe-area-inset-top)",
+              height: keyboardHeight > 0 ? `calc(100% - ${keyboardHeight}px)` : "100%",
+              transition: "height 0.1s ease-out"
+            } : undefined}
           >
             {/* Header */}
             <div className={`bg-funeral-navy px-4 flex items-center gap-3 shrink-0 ${isMobile ? "py-4" : "py-3"}`}>
