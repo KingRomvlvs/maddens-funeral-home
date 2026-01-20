@@ -255,7 +255,7 @@ export function AboutPageContent() {
               <div className="relative">
                 <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-2xl max-w-md mx-auto">
                   <Image
-                    src="/images/community/DSC_8069.jpg"
+                    src="/images/leslie-madden-jr.jpg"
                     alt="Leslie Ruel Madden Jr. - CEO of Madden's Funeral Home"
                     fill
                     className="object-cover"

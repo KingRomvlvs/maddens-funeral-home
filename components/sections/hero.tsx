@@ -123,7 +123,7 @@ export function HeroSection() {
               {/* Main image container */}
               <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/hero-banner-mdbnr2.jpg"
+                  src="/images/welcome-hero-mdhi2.jpg"
                   alt="Madden's Funeral Home - Serving Jamaica with dignity"
                   fill
                   className="object-cover"

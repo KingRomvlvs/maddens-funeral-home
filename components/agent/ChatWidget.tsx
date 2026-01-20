@@ -28,8 +28,29 @@ export function ChatWidget() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Lock body scroll on mobile when chat is open
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, isMobile]);
 
   // Show intro after delay on first visit
   useEffect(() => {
@@ -152,87 +173,97 @@ export function ChatWidget() {
         )}
       </AnimatePresence>
 
-      {/* Floating Button */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 200 }}
-        onClick={() => {
-          setIsOpen(!isOpen);
-          setShowIntro(false);
-        }}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
-          isOpen
-            ? "bg-funeral-charcoal text-white"
-            : "bg-funeral-gold text-funeral-navy hover:bg-funeral-gold/90"
-        }`}
-      >
-        {isOpen ? (
-          <ArrowDownIcon size={24} />
-        ) : (
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Floating Button - hidden on mobile when chat is open */}
+      <AnimatePresence>
+        {!(isOpen && isMobile) && (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            transition={{ delay: isOpen ? 0 : 1, type: "spring", stiffness: 200 }}
+            onClick={() => {
+              setIsOpen(!isOpen);
+              setShowIntro(false);
+            }}
+            className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+              isOpen
+                ? "bg-funeral-charcoal text-white"
+                : "bg-funeral-gold text-funeral-navy hover:bg-funeral-gold/90"
+            }`}
           >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+            {isOpen ? (
+              <ArrowDownIcon size={24} />
+            ) : (
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            )}
+            {/* Pulse animation when not open */}
+            {!isOpen && messages.length === 0 && (
+              <span className="absolute inset-0 rounded-full bg-funeral-gold animate-ping opacity-30" />
+            )}
+          </motion.button>
         )}
-        {/* Pulse animation when not open */}
-        {!isOpen && messages.length === 0 && (
-          <span className="absolute inset-0 rounded-full bg-funeral-gold animate-ping opacity-30" />
-        )}
-      </motion.button>
+      </AnimatePresence>
 
-      {/* Chat Panel */}
+      {/* Chat Panel - Full screen on mobile, floating on desktop */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[70vh] bg-background rounded-lg shadow-2xl border border-border flex flex-col overflow-hidden"
+            exit={{ opacity: 0, y: isMobile ? "100%" : 20, scale: isMobile ? 1 : 0.95 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className={`fixed z-50 bg-background flex flex-col overflow-hidden ${
+              isMobile
+                ? "inset-0"
+                : "bottom-24 right-6 w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[70vh] rounded-lg shadow-2xl border border-border"
+            }`}
+            style={isMobile ? { paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" } : undefined}
           >
             {/* Header */}
-            <div className="bg-funeral-navy px-4 py-3 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-funeral-gold/20 flex items-center justify-center">
-                <span className="text-funeral-gold text-sm font-medium">M</span>
+            <div className={`bg-funeral-navy px-4 flex items-center gap-3 shrink-0 ${isMobile ? "py-4" : "py-3"}`}>
+              <div className={`rounded-full bg-funeral-gold/20 flex items-center justify-center ${isMobile ? "w-12 h-12" : "w-10 h-10"}`}>
+                <span className={`text-funeral-gold font-medium ${isMobile ? "text-base" : "text-sm"}`}>M</span>
               </div>
               <div className="flex-1">
-                <p className="text-white font-medium text-sm">Madden&apos;s Assistant</p>
-                <p className="text-white/60 text-xs">Here to help 24/7</p>
+                <p className={`text-white font-medium ${isMobile ? "text-base" : "text-sm"}`}>Madden&apos;s Assistant</p>
+                <p className={`text-white/60 ${isMobile ? "text-sm" : "text-xs"}`}>Here to help 24/7</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white/60 hover:text-white transition-colors"
+                className="text-white/60 hover:text-white transition-colors p-2"
               >
-                <CloseIcon size={20} />
+                <CloseIcon size={isMobile ? 24 : 20} />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className={`flex-1 overflow-y-auto space-y-4 ${isMobile ? "p-5" : "p-4"}`}>
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                  <div className="w-16 h-16 rounded-full bg-funeral-gold/10 flex items-center justify-center mb-4">
-                    <span className="text-funeral-gold text-2xl font-light">M</span>
+                  <div className={`rounded-full bg-funeral-gold/10 flex items-center justify-center mb-4 ${isMobile ? "w-20 h-20" : "w-16 h-16"}`}>
+                    <span className={`text-funeral-gold font-light ${isMobile ? "text-3xl" : "text-2xl"}`}>M</span>
                   </div>
-                  <p className="text-sm font-medium mb-2">Welcome to Madden&apos;s</p>
-                  <p className="text-xs text-muted-foreground mb-6">
+                  <p className={`font-medium mb-2 ${isMobile ? "text-base" : "text-sm"}`}>Welcome to Madden&apos;s</p>
+                  <p className={`text-muted-foreground mb-6 ${isMobile ? "text-sm" : "text-xs"}`}>
                     How can we assist you today? Select a question below or type your own.
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {presetQuestions.slice(0, 4).map((question) => (
+                    {presetQuestions.slice(0, isMobile ? 6 : 4).map((question) => (
                       <button
                         key={question}
                         onClick={() => handleSend(question)}
-                        className="px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors text-left"
+                        className={`bg-muted hover:bg-muted/80 rounded-full transition-colors text-left ${isMobile ? "px-4 py-2 text-sm" : "px-3 py-1.5 text-xs"}`}
                       >
                         {question}
                       </button>
@@ -249,19 +280,19 @@ export function ChatWidget() {
                       }`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-lg px-4 py-2 ${
+                        className={`max-w-[85%] rounded-lg ${
                           message.role === "user"
                             ? "bg-funeral-gold text-funeral-navy"
                             : "bg-muted"
-                        }`}
+                        } ${isMobile ? "px-4 py-3" : "px-4 py-2"}`}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className={`whitespace-pre-wrap ${isMobile ? "text-base" : "text-sm"}`}>{message.content}</p>
                       </div>
                     </div>
                   ))}
                   {isTyping && (
                     <div className="flex justify-start">
-                      <div className="bg-muted rounded-lg px-4 py-3">
+                      <div className={`bg-muted rounded-lg ${isMobile ? "px-4 py-4" : "px-4 py-3"}`}>
                         <div className="flex gap-1">
                           <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                           <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -276,7 +307,7 @@ export function ChatWidget() {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-border">
+            <div className={`border-t border-border shrink-0 ${isMobile ? "p-4" : "p-3"}`}>
               <div className="flex gap-2">
                 <textarea
                   ref={inputRef}
@@ -285,18 +316,18 @@ export function ChatWidget() {
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
                   rows={1}
-                  className="flex-1 resize-none bg-muted rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-funeral-gold/50 max-h-20"
+                  className={`flex-1 resize-none bg-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-funeral-gold/50 max-h-24 ${isMobile ? "px-4 py-3 text-base" : "px-3 py-2 text-sm"}`}
+                  style={{ fontSize: isMobile ? "16px" : undefined }} // Prevent iOS zoom
                 />
                 <Button
                   onClick={() => handleSend()}
                   disabled={!input.trim() || isTyping}
-                  size="sm"
-                  className="h-auto px-3 bg-funeral-gold text-funeral-navy hover:bg-funeral-gold/90"
+                  className={`bg-funeral-gold text-funeral-navy hover:bg-funeral-gold/90 ${isMobile ? "h-12 w-12 p-0" : "h-auto px-3"}`}
                 >
-                  <SendIcon size={18} />
+                  <SendIcon size={isMobile ? 22 : 18} />
                 </Button>
               </div>
-              <p className="text-[10px] text-muted-foreground text-center mt-2">
+              <p className={`text-muted-foreground text-center ${isMobile ? "text-xs mt-3" : "text-[10px] mt-2"}`}>
                 Powered by AI • For urgent matters, call (876) 952-0212
               </p>
             </div>
