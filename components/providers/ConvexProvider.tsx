@@ -1,6 +1,9 @@
 "use client";
 
-import { ConvexProvider as ConvexReactProvider, ConvexReactClient } from "convex/react";
+import {
+  ConvexProvider as ConvexReactProvider,
+  ConvexReactClient,
+} from "convex/react";
 import { ReactNode, useMemo } from "react";
 
 export function ConvexProvider({ children }: { children: ReactNode }) {

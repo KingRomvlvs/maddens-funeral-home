@@ -41,6 +41,13 @@ import {
   GiftIcon as GiftIconData,
   SchoolIcon as SchoolIconData,
   Delete02Icon as Delete02IconData,
+  Logout03Icon as Logout03IconData,
+  InboxIcon as InboxIconData,
+  User02Icon as User02IconData,
+  AccountSetting02Icon as AccountSetting02IconData,
+  ViewIcon as ViewIconData,
+  Mail02Icon as Mail02IconData,
+  ArchiveIcon as ArchiveIconData,
 } from "@hugeicons/core-free-icons";
 
 interface IconProps {
@@ -190,4 +197,33 @@ export function SchoolIcon({ size = 24, className }: IconProps) {
 
 export function DeleteIcon({ size = 18, className }: IconProps) {
   return <HugeiconsIcon icon={Delete02IconData} size={size} className={className} />;
+}
+
+// Admin icons
+export function LogoutIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={Logout03IconData} size={size} className={className} />;
+}
+
+export function InboxIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={InboxIconData} size={size} className={className} />;
+}
+
+export function UserIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={User02IconData} size={size} className={className} />;
+}
+
+export function SettingsIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={AccountSetting02IconData} size={size} className={className} />;
+}
+
+export function ViewIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={ViewIconData} size={size} className={className} />;
+}
+
+export function ReplyIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={Mail02IconData} size={size} className={className} />;
+}
+
+export function ArchiveIcon({ size = 18, className }: IconProps) {
+  return <HugeiconsIcon icon={ArchiveIconData} size={size} className={className} />;
 }

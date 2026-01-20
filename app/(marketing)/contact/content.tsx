@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
   PhoneIcon,
@@ -9,6 +11,7 @@ import {
   LocationIcon,
   ClockIcon,
   SendIcon,
+  CheckIcon,
 } from "@/components/icons";
 import { LocationMap } from "@/components/map/LocationMap";
 
@@ -30,6 +33,7 @@ const locations = [
 ];
 
 export function ContactPageContent() {
+  const submitContact = useMutation(api.contact.submit);
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -37,12 +41,38 @@ export function ContactPageContent() {
     subject: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission logic would go here
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message. We will contact you shortly.");
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await submitContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        subject: formData.subject,
+        message: formData.message,
+      });
+
+      setIsSubmitted(true);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
+    } catch (err) {
+      console.error("Failed to submit form:", err);
+      setError("Failed to send message. Please try again or call us directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -54,6 +84,9 @@ export function ContactPageContent() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    // Reset submitted state if user starts typing again
+    if (isSubmitted) setIsSubmitted(false);
+    if (error) setError(null);
   };
 
   return (
@@ -284,13 +317,35 @@ export function ContactPageContent() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto rounded-md uppercase tracking-wider"
-                >
-                  <SendIcon size={18} />
-                  Send Message
-                </Button>
+                {isSubmitted ? (
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <CheckIcon size={20} />
+                    <span className="font-medium">
+                      Thank you! We&apos;ll be in touch shortly.
+                    </span>
+                  </div>
+                ) : (
+                  <Button
+                    type="submit"
+                    className="w-full sm:w-auto rounded-md uppercase tracking-wider"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <SendIcon size={18} />
+                        Send Message
+                      </>
+                    )}
+                  </Button>
+                )}
+                {error && (
+                  <p className="text-sm text-destructive mt-2">{error}</p>
+                )}
               </form>
             </div>
           </motion.div>

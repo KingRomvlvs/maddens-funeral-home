@@ -2,14 +2,99 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // Agent conversations
+  // ============================================================
+  // ADMIN USERS - Simple username/password auth
+  // ============================================================
+  adminUsers: defineTable({
+    username: v.string(),
+    passwordHash: v.string(),
+    name: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_username", ["username"]),
+
+  // ============================================================
+  // ADMIN SESSIONS - Session tokens for logged-in admins
+  // ============================================================
+  adminSessions: defineTable({
+    userId: v.id("adminUsers"),
+    token: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_user", ["userId"]),
+
+  // ============================================================
+  // CONTACT FORM SUBMISSIONS
+  // ============================================================
+  contactSubmissions: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    subject: v.string(),
+    message: v.string(),
+    status: v.union(
+      v.literal("new"),
+      v.literal("read"),
+      v.literal("replied"),
+      v.literal("archived")
+    ),
+    // Response tracking
+    respondedAt: v.optional(v.number()),
+    respondedBy: v.optional(v.string()),
+    // Automated response
+    autoReplySent: v.optional(v.boolean()),
+    autoReplySentAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_status", ["status"])
+    .index("by_created_at", ["createdAt"])
+    .index("by_email", ["email"]),
+
+  // ============================================================
+  // ADMIN EMAIL LOGS
+  // ============================================================
+  adminEmailLogs: defineTable({
+    contactSubmissionId: v.optional(v.id("contactSubmissions")),
+    recipientEmail: v.string(),
+    recipientName: v.string(),
+    subject: v.string(),
+    bodyHtml: v.string(),
+    bodyText: v.optional(v.string()),
+    emailType: v.union(
+      v.literal("auto_reply"),
+      v.literal("manual_reply"),
+      v.literal("follow_up")
+    ),
+    resendId: v.optional(v.string()),
+    resendStatus: v.union(
+      v.literal("pending"),
+      v.literal("sent"),
+      v.literal("delivered"),
+      v.literal("bounced"),
+      v.literal("failed")
+    ),
+    sentById: v.optional(v.id("adminUsers")),
+    sentByName: v.string(),
+    createdAt: v.number(),
+    sentAt: v.optional(v.number()),
+  })
+    .index("by_contact", ["contactSubmissionId"])
+    .index("by_recipient", ["recipientEmail"])
+    .index("by_status", ["resendStatus"])
+    .index("by_created", ["createdAt"]),
+
+  // ============================================================
+  // AI CHAT SYSTEM
+  // ============================================================
   agentConversations: defineTable({
     sessionId: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_session", ["sessionId"]),
 
-  // Agent messages
   agentMessages: defineTable({
     conversationId: v.id("agentConversations"),
     role: v.union(v.literal("user"), v.literal("assistant")),
