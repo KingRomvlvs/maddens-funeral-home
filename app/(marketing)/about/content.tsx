@@ -62,18 +62,6 @@ const generations = [
     description:
       "Also trained at McAllister Institute in New York. Assigned to establish and operate the Montego Bay branch. Continued his father's tradition of exceptional client care.",
   },
-  {
-    generation: "Current Leadership",
-    name: "Leslie Ruel Madden Jr.",
-    description:
-      "Serves as CEO and Director of the Lucea and Montego Bay locations, carrying forward the family's legacy into the modern era.",
-  },
-  {
-    generation: "Fifth Generation",
-    name: "Anieka Madden",
-    description:
-      "Recently completed her funeral services degree and joined the family enterprise, representing the fifth generation of Madden funeral directors.",
-  },
 ];
 
 const currentTeam = [
@@ -86,7 +74,26 @@ const currentTeam = [
     name: "Paul Madden",
     role: "Operations Manager, North Street Headquarters (Kingston)",
   },
-  { name: "Isiaa Madden", role: "Manager of Dovecot Operations, Montego Bay" },
+  { name: "Isiaa Madden", role: "Managing Director, Dovecot Cemetery of St. James" },
+  { name: "Aneika Madden", role: "Fifth Generation Funeral Director" },
+  { name: "Zidan Madden", role: "Fifth Generation, Community Outreach" },
+];
+
+const awards = [
+  {
+    recipient: "Isiaa Madden",
+    award: "Howard University IMPACT Award",
+    description:
+      "Recognized for professional excellence and community leadership, honoring her contributions to both the funeral industry and Jamaican society.",
+    year: "2024",
+  },
+  {
+    recipient: "Madden's Funeral Home",
+    award: "Industry Leadership",
+    description:
+      "Recognized as one of the first and still the leader in professional final care services in Jamaica, with over 90 years of continuous service.",
+    year: "Ongoing",
+  },
 ];
 
 const locations = [
@@ -124,7 +131,7 @@ export function AboutPageContent() {
             Five Generations of Service
           </h1>
           <p className="text-lg text-muted-foreground font-light leading-relaxed">
-            For over 70 years, the Madden family has been helping Jamaican
+            For over 90 years, the Madden family has been helping Jamaican
             families honor their loved ones with dignity and care.
           </p>
         </motion.div>
@@ -184,6 +191,86 @@ export function AboutPageContent() {
         </div>
       </section>
 
+      {/* CEO Tribute Section - Leslie Ruel Madden Jr. */}
+      <section className="bg-gradient-to-br from-funeral-navy via-funeral-navy to-funeral-charcoal py-20 mb-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+              viewport={{ once: true }}
+              className="order-2 lg:order-1"
+            >
+              <span className="text-sm font-light tracking-[0.2em] uppercase text-funeral-gold mb-4 block">
+                Current Leadership
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-light mb-6 text-white">
+                Leslie Ruel Madden Jr.
+              </h2>
+              <p className="text-xs text-funeral-gold uppercase tracking-wider mb-4">
+                Chief Executive Officer
+              </p>
+              <div className="space-y-4 text-white/80 font-light leading-relaxed">
+                <p>
+                  As the fourth-generation leader of Madden&apos;s Funeral Home,
+                  Leslie Ruel Madden Jr. carries forward the legacy of
+                  compassion and dignity that his great-grandfather began under
+                  a guinep tree in Kingston.
+                </p>
+                <p>
+                  Serving as CEO and Director of the Lucea and Montego Bay
+                  branches, he has modernized operations while preserving the
+                  family values that have made Madden&apos;s a trusted name for
+                  over 90 years.
+                </p>
+                <p>
+                  Under his leadership, Madden&apos;s has expanded its community
+                  outreach programs, including the annual Christmas Treat that
+                  feeds over 500 families, and the Leslie Ruel Madden Foundation
+                  which provides educational grants to deserving students.
+                </p>
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-white/20">
+                <p className="text-white/60 text-sm font-light italic">
+                  &ldquo;We believe that every person deserves dignity,
+                  regardless of their circumstances. This is what my
+                  great-grandfather taught us, and it&apos;s what we continue to
+                  practice today.&rdquo;
+                </p>
+                <p className="text-funeral-gold text-sm mt-2">
+                  — Leslie Ruel Madden Jr.
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              viewport={{ once: true }}
+              className="order-1 lg:order-2"
+            >
+              <div className="relative">
+                <div className="relative aspect-[3/4] rounded-lg overflow-hidden shadow-2xl max-w-md mx-auto">
+                  <Image
+                    src="/images/community/DSC_8069.jpg"
+                    alt="Leslie Ruel Madden Jr. - CEO of Madden's Funeral Home"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-funeral-navy/60 via-transparent to-transparent" />
+                </div>
+                {/* Decorative elements */}
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 border-2 border-funeral-gold/30 rounded-lg -z-10" />
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-funeral-gold/20 rounded-lg -z-10" />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Generations */}
       <section className="bg-muted/30 py-20 mb-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -194,10 +281,9 @@ export function AboutPageContent() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-light mb-4">A Family Legacy</h2>
+            <h2 className="text-3xl font-light mb-4">The Founding Generations</h2>
             <p className="text-muted-foreground font-light max-w-2xl mx-auto">
-              Five generations of the Madden family have carried forward the
-              tradition of compassionate service.
+              The pioneers who built a legacy of compassionate service.
             </p>
           </motion.div>
 
@@ -228,6 +314,58 @@ export function AboutPageContent() {
         </div>
       </section>
 
+      {/* Awards & Recognition */}
+      <section className="max-w-7xl mx-auto px-6 lg:px-12 mb-20">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <span className="text-sm font-light tracking-[0.2em] uppercase text-funeral-gold mb-4 block">
+            Recognition
+          </span>
+          <h2 className="text-3xl font-light mb-4">Awards & Achievements</h2>
+          <p className="text-muted-foreground font-light max-w-2xl mx-auto">
+            Our commitment to excellence has been recognized throughout the years.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {awards.map((award, index) => (
+            <motion.div
+              key={award.award}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.1,
+                ease: [0.4, 0, 0.2, 1],
+              }}
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-funeral-gold/10 to-funeral-gold/5 rounded-lg p-6 border border-funeral-gold/20"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-funeral-gold/20 flex items-center justify-center">
+                  <StarIcon size={24} className="text-funeral-gold" />
+                </div>
+                <div>
+                  <p className="text-xs text-funeral-gold uppercase tracking-wider">
+                    {award.year}
+                  </p>
+                  <p className="font-medium">{award.recipient}</p>
+                </div>
+              </div>
+              <h3 className="text-lg font-medium mb-2">{award.award}</h3>
+              <p className="text-sm text-muted-foreground font-light">
+                {award.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* Current Team */}
       <section className="max-w-7xl mx-auto px-6 lg:px-12 mb-20">
         <motion.div
@@ -244,7 +382,7 @@ export function AboutPageContent() {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {currentTeam.map((member, index) => (
             <motion.div
               key={member.name}
@@ -426,7 +564,11 @@ export function AboutPageContent() {
                 </li>
                 <li className="flex items-center gap-2 text-muted-foreground font-light">
                   <span className="w-1.5 h-1.5 bg-funeral-gold rounded-full" />
-                  Annual Christmas Treat - Feeding the community
+                  Annual Christmas Treat - Feeding 500+ families
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground font-light">
+                  <span className="w-1.5 h-1.5 bg-funeral-gold rounded-full" />
+                  Partnership with Food For The Poor Jamaica
                 </li>
               </ul>
             </div>
