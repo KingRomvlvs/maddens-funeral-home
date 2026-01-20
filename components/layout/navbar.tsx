@@ -50,6 +50,7 @@ const navItems = [
     ],
   },
   { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact Us" },
 ];
 
 export function Navbar() {
