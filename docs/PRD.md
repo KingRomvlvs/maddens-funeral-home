@@ -89,8 +89,9 @@ A modern, dignified website for Madden's Funeral Home & Crematorium that honors 
 | Requirement | Implementation |
 |-------------|----------------|
 | Interactive Maps | Leaflet + react-leaflet |
-| AI Chat | Convex + OpenRouter API |
+| AI Chat | Convex + OpenRouter API (gpt-4o-mini) |
 | Backend | Convex (schema, actions, rate limiting) |
+| RAG/Vector Database | Convex vector search + OpenRouter embeddings |
 
 ### 3.3 Pending
 
@@ -235,6 +236,16 @@ Each service includes: description, key features, CTA
 ---
 
 ## 8. Changelog
+
+### v1.2.0 (January 2026)
+- Added RAG/Vector Database system for AI knowledge base
+  - `businessInfo` table with vector embeddings (1536 dimensions)
+  - Categories: service, location, faq, policy, pricing, general
+  - OpenRouter text-embedding-3-small for embeddings
+  - Vector similarity search with configurable minimum score
+  - Bulk ingest action for seeding business data
+- AI chat now searches RAG for relevant context before responding
+- Split Convex functions: `rag.ts` (actions) and `ragDb.ts` (mutations/queries)
 
 ### v1.1.0 (January 2026)
 - Added AI Chat Widget with Convex integration

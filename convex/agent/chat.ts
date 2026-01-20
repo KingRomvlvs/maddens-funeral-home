@@ -1,7 +1,7 @@
 "use node";
 
 import { v } from "convex/values";
-import { action, internalMutation, internalQuery } from "../_generated/server";
+import { action } from "../_generated/server";
 import { internal } from "../_generated/api";
 
 // =============================================================================
@@ -112,117 +112,10 @@ Example: "I appreciate your question, but I'm specifically here to help with fun
 - Include relevant phone numbers when appropriate`;
 
 // =============================================================================
-// RATE LIMITING
+// CONSTANTS
 // =============================================================================
 
-const ANONYMOUS_PROMPT_LIMIT = 10; // prompts per hour
-const HOUR_IN_MS = 60 * 60 * 1000;
-
-export const checkRateLimit = internalMutation({
-  args: { sessionId: v.string() },
-  handler: async (ctx, args) => {
-    const now = Date.now();
-
-    const existing = await ctx.db
-      .query("anonymousRateLimits")
-      .withIndex("by_identifier", (q) => q.eq("identifier", args.sessionId))
-      .first();
-
-    if (!existing) {
-      await ctx.db.insert("anonymousRateLimits", {
-        identifier: args.sessionId,
-        promptCount: 1,
-        resetAt: now + HOUR_IN_MS,
-      });
-      return { allowed: true, remaining: ANONYMOUS_PROMPT_LIMIT - 1 };
-    }
-
-    // Check if reset time has passed
-    if (now >= existing.resetAt) {
-      await ctx.db.patch(existing._id, {
-        promptCount: 1,
-        resetAt: now + HOUR_IN_MS,
-      });
-      return { allowed: true, remaining: ANONYMOUS_PROMPT_LIMIT - 1 };
-    }
-
-    // Check if over limit
-    if (existing.promptCount >= ANONYMOUS_PROMPT_LIMIT) {
-      const minutesUntilReset = Math.ceil((existing.resetAt - now) / 60000);
-      return {
-        allowed: false,
-        remaining: 0,
-        minutesUntilReset,
-      };
-    }
-
-    // Increment counter
-    await ctx.db.patch(existing._id, {
-      promptCount: existing.promptCount + 1,
-    });
-
-    return {
-      allowed: true,
-      remaining: ANONYMOUS_PROMPT_LIMIT - existing.promptCount - 1,
-    };
-  },
-});
-
-// =============================================================================
-// CONVERSATION MANAGEMENT
-// =============================================================================
-
-export const getOrCreateConversation = internalMutation({
-  args: {
-    sessionId: v.string(),
-    conversationId: v.optional(v.id("agentConversations")),
-  },
-  handler: async (ctx, args) => {
-    if (args.conversationId) {
-      const existing = await ctx.db.get(args.conversationId);
-      if (existing) {
-        await ctx.db.patch(args.conversationId, { updatedAt: Date.now() });
-        return args.conversationId;
-      }
-    }
-
-    // Create new conversation
-    return await ctx.db.insert("agentConversations", {
-      sessionId: args.sessionId,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-  },
-});
-
-export const saveMessage = internalMutation({
-  args: {
-    conversationId: v.id("agentConversations"),
-    role: v.union(v.literal("user"), v.literal("assistant")),
-    content: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("agentMessages", {
-      conversationId: args.conversationId,
-      role: args.role,
-      content: args.content,
-      createdAt: Date.now(),
-    });
-  },
-});
-
-export const getConversationHistory = internalQuery({
-  args: { conversationId: v.id("agentConversations") },
-  handler: async (ctx, args) => {
-    const messages = await ctx.db
-      .query("agentMessages")
-      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .order("asc")
-      .take(20); // Limit history to last 20 messages
-
-    return messages;
-  },
-});
+const ANONYMOUS_PROMPT_LIMIT = 10;
 
 // =============================================================================
 // TOPIC DETECTION - CONSERVE TOKENS
@@ -312,7 +205,7 @@ export const ask = action({
   },
   handler: async (ctx, args): Promise<ChatResponse> => {
     // Check rate limit
-    const rateLimitResult = await ctx.runMutation(internal.agent.chat.checkRateLimit, {
+    const rateLimitResult = await ctx.runMutation(internal.agent.db.checkRateLimit, {
       sessionId: args.sessionId,
     });
 
@@ -330,17 +223,17 @@ export const ask = action({
       const greetingResponse = "Hello! Welcome to Madden's Funeral Home. I'm here to help you with any questions about our services, locations, or funeral planning. How may I assist you today?";
 
       const conversationId = await ctx.runMutation(
-        internal.agent.chat.getOrCreateConversation,
+        internal.agent.db.getOrCreateConversation,
         { sessionId: args.sessionId, conversationId: args.conversationId }
       );
 
-      await ctx.runMutation(internal.agent.chat.saveMessage, {
+      await ctx.runMutation(internal.agent.db.saveMessage, {
         conversationId,
         role: "user",
         content: args.question,
       });
 
-      await ctx.runMutation(internal.agent.chat.saveMessage, {
+      await ctx.runMutation(internal.agent.db.saveMessage, {
         conversationId,
         role: "assistant",
         content: greetingResponse,
@@ -358,17 +251,17 @@ export const ask = action({
       const offTopicResponse = "I appreciate your question, but I'm specifically here to help with funeral services and death care information. Is there anything I can help you with regarding our services, pre-planning, or making arrangements? You can also call us at (876) 952-0212.";
 
       const conversationId = await ctx.runMutation(
-        internal.agent.chat.getOrCreateConversation,
+        internal.agent.db.getOrCreateConversation,
         { sessionId: args.sessionId, conversationId: args.conversationId }
       );
 
-      await ctx.runMutation(internal.agent.chat.saveMessage, {
+      await ctx.runMutation(internal.agent.db.saveMessage, {
         conversationId,
         role: "user",
         content: args.question,
       });
 
-      await ctx.runMutation(internal.agent.chat.saveMessage, {
+      await ctx.runMutation(internal.agent.db.saveMessage, {
         conversationId,
         role: "assistant",
         content: offTopicResponse,
@@ -383,19 +276,19 @@ export const ask = action({
 
     // Get or create conversation
     const conversationId = await ctx.runMutation(
-      internal.agent.chat.getOrCreateConversation,
+      internal.agent.db.getOrCreateConversation,
       { sessionId: args.sessionId, conversationId: args.conversationId }
     );
 
     // Save user message
-    await ctx.runMutation(internal.agent.chat.saveMessage, {
+    await ctx.runMutation(internal.agent.db.saveMessage, {
       conversationId,
       role: "user",
       content: args.question,
     });
 
     // Get conversation history for context
-    const history = await ctx.runQuery(internal.agent.chat.getConversationHistory, {
+    const history = await ctx.runQuery(internal.agent.db.getConversationHistory, {
       conversationId,
     });
 
@@ -417,6 +310,31 @@ export const ask = action({
       role: "user",
       content: args.question,
     });
+
+    // Search RAG for relevant business context
+    let ragContext = "";
+    try {
+      const ragResults = await ctx.runAction(internal.agent.rag.search, {
+        query: args.question,
+        limit: 3,
+        minScore: 0.65,
+      });
+
+      if (ragResults.length > 0) {
+        ragContext = ragResults.map((r) => r.text).join("\n\n");
+      }
+    } catch (error) {
+      console.error("RAG search error:", error);
+      // Continue without RAG context if search fails
+    }
+
+    // If we have RAG context, add it to the system message
+    if (ragContext) {
+      messages[0] = {
+        role: "system",
+        content: `${SYSTEM_PROMPT}\n\n=== ADDITIONAL BUSINESS INFORMATION ===\n${ragContext}`,
+      };
+    }
 
     // Call OpenRouter API
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -456,7 +374,7 @@ export const ask = action({
         "I apologize, but I couldn't process your request. Please call us at (876) 952-0212 for assistance.";
 
       // Save assistant response
-      await ctx.runMutation(internal.agent.chat.saveMessage, {
+      await ctx.runMutation(internal.agent.db.saveMessage, {
         conversationId,
         role: "assistant",
         content: assistantMessage,

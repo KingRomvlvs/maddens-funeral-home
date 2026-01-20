@@ -254,19 +254,113 @@ bun run lint
 
 ---
 
-## 12. Environment Variables
+## 12. Backend Integration (Convex)
+
+### Overview
+The site uses Convex as a serverless backend for the AI chat system and vector database.
+
+### Convex Tables
+
+| Table | Purpose |
+|-------|---------|
+| `agentConversations` | Chat conversation sessions |
+| `agentMessages` | Individual chat messages |
+| `anonymousRateLimits` | Rate limiting (10 msgs/hour per session) |
+| `businessInfo` | RAG knowledge base with vector embeddings |
+
+### Convex Files
+
+| File | Purpose | Runtime |
+|------|---------|---------|
+| `convex/agent/chat.ts` | Main AI chat action | Node.js |
+| `convex/agent/db.ts` | Conversation mutations/queries | V8 |
+| `convex/agent/rag.ts` | RAG search and ingest actions | Node.js |
+| `convex/agent/ragDb.ts` | RAG database mutations/queries | V8 |
+| `convex/schema.ts` | Database schema definition | - |
+
+### Key Pattern: Node.js vs V8 Runtime
+Convex has two runtimes:
+- **V8 (default)**: For mutations and queries - no `"use node"` directive
+- **Node.js**: For actions that need external APIs - requires `"use node"` directive
+
+Files are split to keep mutations/queries in V8 and actions in Node.js.
+
+---
+
+## 12.5 AI Systems Architecture
+
+### AI Chat (`convex/agent/chat.ts`)
+
+The AI assistant uses OpenRouter (gpt-4o-mini) with:
+
+1. **Token Conservation**: Greetings and off-topic questions handled without AI calls
+2. **Topic Filtering**: Only responds to funeral-related queries
+3. **Rate Limiting**: 10 messages per hour for anonymous users
+4. **RAG Context**: Searches business info before responding
+
+### RAG System (`convex/agent/rag.ts`)
+
+Vector database for storing business knowledge:
+
+| Category | Content Type |
+|----------|--------------|
+| `service` | Service descriptions, packages, features |
+| `location` | Address, hours, directions, parking |
+| `faq` | Common questions and answers |
+| `policy` | Business policies, procedures |
+| `pricing` | Price ranges, package costs |
+| `general` | Company history, values, staff |
+
+### Adding Business Information
+
+```typescript
+// Single item
+await ctx.runAction(internal.agent.rag.ingest, {
+  content: "Description of the service or information...",
+  category: "service",
+  title: "Service Name"
+});
+
+// Bulk ingest
+await ctx.runAction(internal.agent.rag.bulkIngest, {
+  items: [
+    { content: "...", category: "service", title: "..." },
+    { content: "...", category: "faq", title: "..." },
+  ]
+});
+```
+
+### AI Models (via OpenRouter)
+
+| Model | Purpose | Env Variable |
+|-------|---------|--------------|
+| `openai/gpt-4o-mini` | Chat responses | `OPENROUTER_CHAT_MODEL` |
+| `openai/text-embedding-3-small` | Vector embeddings (1536d) | `OPENROUTER_EMBEDDING_MODEL` |
+
+---
+
+## 13. Environment Variables
+
+### Next.js (.env.local)
 
 ```bash
-# Currently no external services configured
-# Future additions may include:
-# - Contact form backend
-# - CMS integration
-# - Analytics
+# Convex
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+```
+
+### Convex Dashboard (set via `npx convex env set`)
+
+```bash
+# OpenRouter API
+OPENROUTER_API_KEY=sk-or-v1-xxx           # Required
+OPENROUTER_CHAT_MODEL=openai/gpt-4o-mini  # Optional (default)
+OPENROUTER_EMBEDDING_MODEL=openai/text-embedding-3-small  # Optional (default)
+SITE_URL=https://maddensfuneralhome.com   # For API headers
 ```
 
 ---
 
-## 13. Important Notes
+## 14. Important Notes
 
 - **Dark Mode:** Warm Charcoal (oklch(0.15 0.01 60)), NEVER pure black
 - **Font Weight:** Prefer 300 (Light) for body text, 400-500 for headings
@@ -277,7 +371,7 @@ bun run lint
 
 ---
 
-## 14. Quick Reference
+## 15. Quick Reference
 
 | Task | Command/Location |
 |------|-----------------|
@@ -285,10 +379,14 @@ bun run lint
 | Change theme colors | Edit `app/globals.css` |
 | Add new page | Create in `app/(marketing)/` |
 | Update contact info | Edit `components/layout/footer.tsx` |
+| Deploy Convex | `npx convex dev --once` |
+| Set Convex env var | `npx convex env set KEY value` |
+| View Convex logs | `npx convex logs` |
+| Add to AI knowledge | Run `internal.agent.rag.ingest` action |
 
 ---
 
-## 15. Documentation Index
+## 16. Documentation Index
 
 | Document | Purpose | Location |
 |----------|---------|----------|

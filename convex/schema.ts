@@ -23,4 +23,19 @@ export default defineSchema({
     promptCount: v.number(),
     resetAt: v.number(),
   }).index("by_identifier", ["identifier"]),
+
+  // Business information for RAG - stores funeral home knowledge
+  businessInfo: defineTable({
+    content: v.string(),
+    category: v.string(), // service, location, faq, policy, pricing, general
+    title: v.optional(v.string()),
+    embedding: v.array(v.float64()),
+    createdAt: v.number(),
+  })
+    .index("by_category", ["category"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 1536,
+      filterFields: ["category"],
+    }),
 });
